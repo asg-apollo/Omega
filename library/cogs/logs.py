@@ -238,8 +238,9 @@ class Logs(Cog):
 
         embed = Embed(title=f"{typeOfChange} Change", color=discord.Color.dark_teal(), timestamp=datetime.utcnow())
         if typeOfChange == "Avatar":
-            embed.add_field(name="Avatar Before: ", value=f"[Before]({before.avatar_url})", inline= True)
-
+            embed.add_field(name="Avatar Before: ", value=f"[Before]({before.avatar_url})", inline=True)
+            embed.add_field(name="Avatar After: ", value=f"[After]({after.avatar_url})", inline=True)
+            embed.set_author(name=before, icon_url=before.avatar_url)
         await channel.send(embed=embed)
 
 def setup(bot):
