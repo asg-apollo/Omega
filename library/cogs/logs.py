@@ -134,7 +134,6 @@ class Logs(Cog):
         if after.changed_roles:
             return
         else:
-            print("doneso")
             embed.add_field(name="Updater: ", value=entry.user.mention)
             embed.set_footer(text=f"Channel ID: {before.id}")
             embed.set_author(name=entry.user, icon_url=entry.user.avatar_url)
@@ -232,14 +231,59 @@ class Logs(Cog):
     @Cog.listener()
     async def on_user_update(self, before, after):
         channel = self.bot.get_channel(config.moderationLogsChannel)
+        print("Update")
         if config.logAvatarChanges:
             if after.avatar_url is not before.avatar_url:
                 typeOfChange = "Avatar"
+        if config.logUsernameChanges:
+            if after.username is not before.username:
+                typeOfChange = "Username"
+        if config.logNicknameChanges:
+            if after.display_name is not before.display_name:
+                typeOfChange = "Nickname"
+                print("nick")
+        if config.logDiscriminatorChanges:
+            if after.discriminator is not before.discriminator:
+                typeOfChange == "Discriminator"
+                print("discriminator")
 
         embed = Embed(title=f"{typeOfChange} Change", color=discord.Color.dark_teal(), timestamp=datetime.utcnow())
         if typeOfChange == "Avatar":
             embed.add_field(name="Avatar Before: ", value=f"[Before]({before.avatar_url})", inline=True)
             embed.add_field(name="Avatar After: ", value=f"[After]({after.avatar_url})", inline=True)
+            embed.set_author(name=before, icon_url=before.avatar_url)
+
+        elif typeOfChange == "Username":
+            embed.add_field(name="Username Before: ", value=f"{before.username}", inline=True)
+            embed.add_field(name="Username After: ", value=f"{after.username}", inline=True)
+            embed.set_author(name=before, icon_url=before.avatar_url)
+
+        elif typeOfChange == "Discriminator":
+            embed.add_field(name="Discriminator Before: ", value=before.discriminator)
+            embed.add_field(name="Discriminator After: ", value=after.discriminator)
+            embed.set_author(name=before, icon_url=before.avatar_url)
+
+
+
+        else:
+            return
+        await channel.send(embed=embed)
+
+    @Cog.listener()
+    async def on_member_update(self, before, after):
+
+        channel = self.bot.get_channel(config.moderationLogsChannel)
+        print("Update")
+        if config.logNicknameChanges:
+            if after.display_name is not before.display_name:
+                typeOfChange = "Nickname"
+                print("nick")
+
+        embed = Embed(title=f"{typeOfChange} Change", color=discord.Color.dark_teal(), timestamp=datetime.utcnow())
+        if typeOfChange == "Nickname":
+            print("embed")
+            embed.add_field(name="Nickname Before: ", value=f"{before.nick}", inline=True)
+            embed.add_field(name="Nickname After: ", value=f"{after.nick}", inline=True)
             embed.set_author(name=before, icon_url=before.avatar_url)
         await channel.send(embed=embed)
 

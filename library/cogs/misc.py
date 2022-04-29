@@ -1,6 +1,6 @@
 from discord.ext.commands import command, Cog, has_permissions, CheckFailure
 
-from .. db import db
+from ..db import db
 
 
 class Misc(Cog):
@@ -25,6 +25,7 @@ class Misc(Cog):
     async def on_ready(self):
         if not self.bot.ready:
             self.bot.cogs_ready.ready_up("misc")
+
 
 def setup(bot):
     bot.add_cog(Misc(bot))

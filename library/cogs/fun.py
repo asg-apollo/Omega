@@ -11,6 +11,7 @@ from discord.ext.commands import command
 
 from ..joke_api import Jokes
 
+
 class Fun(Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -45,7 +46,6 @@ class Fun(Cog):
             await ctx.send("Selected number is too large. Please select a number under 1000.")
             return
 
-
         await ctx.send("Race starting in..")
         await asyncio.sleep(0.3)
         await ctx.send("3")
@@ -59,7 +59,7 @@ class Fun(Cog):
         racer1 = ctx.author
         racer2 = member
         racer1Time = 0
-        racer2Time= 0
+        racer2Time = 0
 
         if length < 10:
             racer1Time = random.randrange(1, 3)

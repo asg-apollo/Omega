@@ -18,6 +18,7 @@ def get_prefix(bot, message):
 
 class Ready(object):
     def __init__(self):
+
         for cog in COGS:
             setattr(self, cog, False)
 

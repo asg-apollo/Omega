@@ -1,6 +1,6 @@
 from typing import Optional
 
-from discord import Embed
+from discord import Embed, HTTPException
 from discord.ext.commands import Cog
 from discord.ext.menus import MenuPages, ListPageSource
 from discord.ext.commands import command
@@ -81,6 +81,7 @@ class Help(Cog):
     async def on_ready(self):
         if not self.bot.ready:
             self.bot.cogs_ready.ready_up("help")
+
 
 
 def setup(bot):

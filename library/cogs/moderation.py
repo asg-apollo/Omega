@@ -2,13 +2,13 @@ import asyncio
 from typing import Optional
 
 import discord
-from discord import Member
+from discord import Member, Embed
 from discord.ext.commands import Cog, has_permissions
 from discord.ext.commands import command
-from ..bot import config
+from library.bot import config
 
-from . import logs
-from ..db import db
+from library.cogs import logs
+from library.db import db
 
 
 class Moderation(Cog):
@@ -84,6 +84,20 @@ class Moderation(Cog):
         else:
             await ctx.send(f"{member} is not restricted!")
 
+    @has_permissions(manage_messages=True)
+    @command(name="clear", brief="Deletes the inputted amount of messages in a channel.")
+    async def _clear(self, ctx,amount: int):
+        await ctx.channel.purge(limit=amount)
+        await ctx.channel.send(f"{amount} messages have been deleted in {ctx.channel.mention}!")
 
+
+    @Cog.listener()
+    async def on_member_join(self, member):
+        if config.kickMembersAfterTimerOnJoin:
+            await asyncio.sleep(config.timeUntilKickOnJoin)
+            if member.roles == 1:
+                await member.kick(reason=config.reasonForAutoKick)
+            else:
+                return
 def setup(bot):
     bot.add_cog(Moderation(bot))

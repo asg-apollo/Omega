@@ -20,7 +20,15 @@ logNicknameChanges = True
 logMemberLeave = True
 logModerationActions = True
 
+kickMembersAfterTimerOnJoin = True
+
 # Roles
 modRole = 955907677186297917
 liveNowRole = 954518807685263370
 restrictedRole = "Restricted"
+
+# Timers
+timeUntilKickOnJoin = 30;
+
+# Moderation Reasons
+reasonForAutoKick = "You did not recieve roles within the time limit!"
