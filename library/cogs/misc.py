@@ -1,4 +1,4 @@
-from discord.ext.commands import command, Cog, has_permissions, CheckFailure
+from disnake.ext.commands import command, Cog, has_permissions, CheckFailure, slash_command
 
 from ..db import db
 
@@ -7,7 +7,7 @@ class Misc(Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @command(name="prefix")
+    @slash_command(name="prefix")
     @has_permissions(manage_guild=True)
     async def change_prefix(self, ctx, new: str):
         if len(new) > 5:

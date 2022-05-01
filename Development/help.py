@@ -1,10 +1,10 @@
 from typing import Optional
 
-from discord import Embed, HTTPException
-from discord.ext.commands import Cog
-from discord.ext.menus import MenuPages, ListPageSource
-from discord.ext.commands import command
-from discord.utils import get
+from disnake import Embed, HTTPException
+from disnake.ext.commands import Cog
+from disnake.ext.menus import MenuPages, ListPageSource
+from disnake.ext.commands import command
+from disnake.utils import get
 
 
 def syntax(command):

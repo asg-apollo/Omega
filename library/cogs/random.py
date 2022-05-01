@@ -1,5 +1,5 @@
-from discord.ext.commands import Cog
-from discord.ext.commands import command
+from disnake.ext.commands import Cog
+from disnake.ext.commands import command
 
 
 class random(Cog):

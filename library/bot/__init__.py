@@ -1,11 +1,13 @@
 from asyncio import sleep
 
-from discord import Intents, Forbidden
+from disnake import Intents, Forbidden
 from glob import glob
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from discord.ext.commands import Bot as BotBase, Context, BadArgument, MissingRequiredArgument, command, has_permissions
-from discord.ext.commands import CommandNotFound, when_mentioned_or
+from disnake.ext.commands import Bot as BotBase, Context, BadArgument, MissingRequiredArgument, command, has_permissions
+from disnake.ext.commands import CommandNotFound, when_mentioned_or
 from ..db import db
+
+import interactions
 
 OWNER_IDS = [279283820354863104]
 COGS = [path.split("\\")[-1][:-3] for path in glob("./library/cogs/*.py")]
@@ -18,7 +20,6 @@ def get_prefix(bot, message):
 
 class Ready(object):
     def __init__(self):
-
         for cog in COGS:
             setattr(self, cog, False)
 
@@ -42,8 +43,10 @@ class Bot(BotBase):
         super().__init__(
             command_prefix=get_prefix,
             owner_ids=OWNER_IDS,
-            intents=Intents.all(),
+            intents=Intents.all()
         )
+
+
 
     def run(self, version):
         self.VERSION = version
@@ -53,6 +56,7 @@ class Bot(BotBase):
 
         with open("./library/bot/token", "r", encoding="utf-8") as tf:
             self.TOKEN = tf.read()
+
         print("running bot...")
         super().run(self.TOKEN, reconnect=True)
 
@@ -66,14 +70,17 @@ class Bot(BotBase):
         db.multiexec("INSERT OR IGNORE INTO guilds (GuildID) VALUES (?)",
                      ((guild.id,) for guild in self.guilds))
 
-        to_remove = []
-        stored_members = db.column("SELECT UserID FROM exp")
-        for id_ in stored_members:
-            if not self.guild.member(id):
-                to_remove.append(id_)
+        db.multiexec("INSERT OR IGNORE INTO guildSettings (GuildID) VALUES (?)",
+                     ((guild.id,) for guild in self.guilds))
 
-        db.multiexec("DELETE FROM exp WHERE UserID = ?",
-                     ((id,) for id in to_remove))
+        # to_remove = []
+        # stored_members = db.column("SELECT UserID FROM exp")
+        # for id_ in stored_members:
+        #     if not self.guild.member(id):
+        #         to_remove.append(id_)
+        #
+        # db.multiexec("DELETE FROM exp WHERE UserID = ?",
+        #              ((id,) for id in to_remove))
 
         db.commit()
 
@@ -122,6 +129,8 @@ class Bot(BotBase):
             self.guild = self.get_guild(928484198283632701)
             self.scheduler.start()
 
+            self.update_db()
+
             while not self.cogs_ready.all_ready():
                 await sleep(0.5)
 
@@ -129,6 +138,7 @@ class Bot(BotBase):
                          ((member.id,) for guild in self.guilds for member in guild.members if not member.bot))
 
             self.ready = True
+
             print("bot ready")
 
         else:

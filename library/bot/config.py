@@ -19,8 +19,12 @@ logDiscriminatorChanges = True
 logNicknameChanges = True
 logMemberLeave = True
 logModerationActions = True
-
 kickMembersAfterTimerOnJoin = True
+
+## AutoMod
+deleteAllLinks = True
+deleteBlacklistedLinks = False
+deleteBlacklistedWords = True
 
 # Roles
 modRole = 955907677186297917

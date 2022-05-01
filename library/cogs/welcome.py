@@ -1,7 +1,7 @@
 from sqlite3 import IntegrityError
 
-from discord.ext.commands import Cog
-from discord.ext.commands import command
+from disnake.ext.commands import Cog
+from disnake.ext.commands import command
 from ..bot import config
 
 from ..db import db
