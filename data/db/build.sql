@@ -8,7 +8,10 @@ CREATE TABLE IF NOT EXISTS guilds(
     logModerationActions bool DEFAULT TRUE,
     dmUserOnKickOrBan bool DEFAULT FALSE,
     logActionsDoneByBots bool DEFAULT FALSE,
-    dmUserOnModerationAction bool DEFAULT FALSE
+    dmUserOnModerationAction bool DEFAULT FALSE,
+    deleteAllLinks bool DEFAULT TRUE,
+    deleteBlacklistedLinks DEFAULT FALSE,
+    deleteBlacklistedWords DEFAULT TRUE
 );
 
 CREATE TABLE IF NOT EXISTS guildSettings(

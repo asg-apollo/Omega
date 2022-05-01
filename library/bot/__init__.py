@@ -1,6 +1,8 @@
 from asyncio import sleep
 
-from disnake import Intents, Forbidden
+import discord
+import disnake
+from disnake import Intents, Forbidden, activity
 from glob import glob
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from disnake.ext.commands import Bot as BotBase, Context, BadArgument, MissingRequiredArgument, command, has_permissions
@@ -140,6 +142,8 @@ class Bot(BotBase):
             self.ready = True
 
             print("bot ready")
+            game = disnake.Activity(type=disnake.ActivityType.listening, name="commands.")
+            await bot.change_presence(activity=game)
 
         else:
             print("bot reconnected")

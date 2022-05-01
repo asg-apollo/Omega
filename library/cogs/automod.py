@@ -1,6 +1,7 @@
 from disnake.ext.commands import Cog
 from disnake.ext.commands import command
 from ..bot import config
+from ..db import db
 
 
 class autoMod(Cog):
@@ -26,16 +27,29 @@ class autoMod(Cog):
         with open("C:/Users/Ethan/Documents/GitHub/Omega/library/bot/blacklistedLinks.txt", "r") as f2:
             blacklistedLinks = f2.read()
 
-        if config.deleteBlacklistedWords:
+        record = db.record("SELECT deleteBlacklistedWords FROM guilds WHERE GuildID =?", message.guild.id)
+        for (configBool) in record:
+            isTrue = configBool
+
+        if isTrue == 1:
             for line in blacklistedWords:
                 if line.strip() in msg:
                     await message.delete()
                     await channel.send(f"That is a blacklisted word {message.author.mention}.")
-        if config.deleteAllLinks:
+
+        record = db.record("SELECT deleteAllLinks FROM guilds WHERE GuildID =?", message.guild.id)
+        for (configBool) in record:
+            isTrue = configBool
+
+        if isTrue == 1:
             if "https://" in msg:
                 await message.delete()
                 await channel.send(f"That is a blacklisted link {message.author.mention}.")
-        if config.deleteBlacklistedLinks:
+        record = db.record("SELECT deleteBlacklistedLinks FROM guilds WHERE GuildID =?", message.guild.id)
+        for (configBool) in record:
+            isTrue = configBool
+
+        if isTrue == 1:
             if blacklistedLinks in msg:
                 await message.delete()
                 await channel.send(f"That is a blacklisted link {message.author.mention}.")

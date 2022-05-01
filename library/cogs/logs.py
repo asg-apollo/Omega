@@ -56,7 +56,11 @@ class Logs(Cog):
         if message.author.bot:
             return
 
-        channel = self.bot.get_channel(config.moderationLogsChannel)
+        record = db.record("SELECT logChannel FROM guildSettings WHERE GuildID =?", message.guild.id)
+        for (configChannel) in record:
+            logChannel = configChannel
+        channel = self.bot.get_channel(logChannel)
+
         embed = Embed(title="Message Deleted", color=disnake.Color.red(), timestamp=datetime.now())
         embed.set_author(name=message.author, icon_url=message.author.display_avatar)
         embed.add_field(name="Author: ", value=message.author.mention)
@@ -75,7 +79,11 @@ class Logs(Cog):
         if beforeMessage.author.bot:
             return
 
-        channel = self.bot.get_channel(config.moderationLogsChannel)
+        record = db.record("SELECT logChannel FROM guildSettings WHERE GuildID =?", beforeMessage.guild.id)
+        for (configChannel) in record:
+            logChannel = configChannel
+        channel = self.bot.get_channel(logChannel)
+
         embed = Embed(title="Message Edited", color=disnake.Color.dark_teal(), timestamp=datetime.now())
         embed.set_author(name=beforeMessage.author, icon_url=beforeMessage.author.display_avatar)
         embed.add_field(name="Author: ", value=beforeMessage.author.mention)
@@ -96,6 +104,7 @@ class Logs(Cog):
         for (configChannel) in record:
             logChannel = configChannel
         channel = self.bot.get_channel(logChannel)
+
         embed = Embed(title="Bulk Delete", color=disnake.Color.dark_teal(), timestamp=datetime.now())
         embed.set_author(name=inter.guild.name, icon_url=inter.guild.icon)
         embed.add_field(name="Amount of messages deleted: ", value=amount)
