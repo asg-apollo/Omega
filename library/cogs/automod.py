@@ -1,6 +1,4 @@
 from disnake.ext.commands import Cog
-from disnake.ext.commands import command
-from ..bot import config
 from ..db import db
 
 

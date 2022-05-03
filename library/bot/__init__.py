@@ -1,15 +1,13 @@
 from asyncio import sleep
-
-import discord
-import disnake
-from disnake import Intents, Forbidden, activity
 from glob import glob
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from disnake.ext.commands import Bot as BotBase, Context, BadArgument, MissingRequiredArgument, command, has_permissions
-from disnake.ext.commands import CommandNotFound, when_mentioned_or
-from ..db import db
 
-import interactions
+import disnake
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from disnake import Intents, Forbidden
+from disnake.ext.commands import Bot as BotBase, Context, BadArgument, MissingRequiredArgument
+from disnake.ext.commands import CommandNotFound, when_mentioned_or
+
+from ..db import db
 
 OWNER_IDS = [279283820354863104]
 COGS = [path.split("\\")[-1][:-3] for path in glob("./library/cogs/*.py")]
@@ -47,8 +45,6 @@ class Bot(BotBase):
             owner_ids=OWNER_IDS,
             intents=Intents.all()
         )
-
-
 
     def run(self, version):
         self.VERSION = version

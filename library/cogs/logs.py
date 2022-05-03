@@ -2,10 +2,8 @@ from datetime import datetime
 from typing import Optional
 
 import disnake
-from discord.ext.commands import bot
 from disnake import Embed, Member, Colour, ChannelType
 from disnake.ext.commands import Cog
-from disnake.ext.commands import command
 from ..bot import config
 
 from ..db import db

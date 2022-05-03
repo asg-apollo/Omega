@@ -1,11 +1,9 @@
 import asyncio
 from datetime import datetime
-from typing import Optional
 
 import disnake
 from disnake import Member, Embed, Interaction, Role
 from disnake.ext.commands import Cog, has_permissions, slash_command, has_role, MissingRole
-from disnake.ext.commands import command
 from library.bot import config
 
 from library.cogs import logs
