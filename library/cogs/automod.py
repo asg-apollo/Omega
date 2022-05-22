@@ -1,5 +1,5 @@
 from disnake.ext.commands import Cog
-from ..db import db
+from library.db import db
 
 
 class autoMod(Cog):
@@ -19,10 +19,10 @@ class autoMod(Cog):
 
         msg = message.content
         channel = message.channel
-        with open("C:/Users/Ethan/Documents/GitHub/Omega/library/bot/blacklistedWords.txt", "r") as f:
+        with open("./library/bot/blacklistedWords.txt", "r") as f:
             blacklistedWords = f.readlines()
 
-        with open("C:/Users/Ethan/Documents/GitHub/Omega/library/bot/blacklistedLinks.txt", "r") as f2:
+        with open("./library/bot/blacklistedLinks.txt", "r") as f2:
             blacklistedLinks = f2.read()
 
         record = db.record("SELECT deleteBlacklistedWords FROM guilds WHERE GuildID =?", message.guild.id)

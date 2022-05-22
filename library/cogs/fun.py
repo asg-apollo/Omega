@@ -38,6 +38,7 @@ class Fun(Cog):
 
     @slash_command(name="race", description="Race the selected member with a optional distance!")
     async def race_member(self, ctx, member: disnake.Member, length=100):
+        length = int(length)
         if member == ctx.author:
             await ctx.send("You can't race yourself!")
             return
@@ -92,8 +93,20 @@ class Fun(Cog):
 
         result_embed = Embed(title="Race", description=f"Race between {ctx.author.mention} and {member.mention}",
                              timestamp=datetime.now(), color=ctx.author.color)
-        result_embed.add_field(name=f"{ctx.author.display_name} ran {length}m in: ", value=racer1Time)
-        result_embed.add_field(name=f"{member.display_name} ran {length}m in: ", value=racer2Time)
+        result_embed.add_field(name=f"{ctx.author.display_name} ran {length}m in: ", value=f"{racer1Time} seconds")
+        result_embed.add_field(name=f"{member.display_name} ran {length}m in: ", value=f"{racer2Time} seconds", inline=False)
+
+        if racer1Time < racer2Time:
+            winner = racer1
+            text = f"{winner} won! Congratulations!"
+        if racer2Time < racer1Time:
+            winner = racer2
+            text = f"{winner} won! Congratulations!"
+        elif racer1Time == racer2Time:
+            winner = "Tie!"
+            text = f"It's a tie!"
+
+        result_embed.add_field(name="Winner: ", value=text)
 
         await ctx.send(embed=three_embed)
         await asyncio.sleep(0.3)

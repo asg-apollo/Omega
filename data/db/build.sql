@@ -18,7 +18,14 @@ CREATE TABLE IF NOT EXISTS guildSettings(
     GuildID integer PRIMARY KEY,
     modRole text,
     restrictedRole text,
-    logChannel integer
+    logChannel integer,
+    welcomeChannel integer,
+    suggestionChannel integer,
+    suggestModule DEFAULT TRUE,
+    moderationModule DEFAULT TRUE,
+    welcomeModule DEFAULT TRUE,
+    coinEmoji text,
+    lotteryPrice integer DEFAULT 5
 );
 
 CREATE TABLE IF NOT EXISTS exp (
@@ -34,4 +41,29 @@ CREATE TABLE IF NOT EXISTS restricted(
     durationTillUnrestricted integer
 );
 
+CREATE TABLE IF NOT EXISTS suggestions(
+    rowNumber integer PRIMARY KEY,
+    suggestNumber integer,
+    GuildID integer,
+    SubmitterID integer,
+    suggestion text,
+    status text
+);
+
+CREATE TABLE IF NOT EXISTS economy(
+    GuildID integer,
+    UserID integer,
+    balance integer DEFAULT 0,
+    maxCoinsInCirculation integer DEFAULT 1000000
+);
+
+CREATE TABLE IF NOT EXISTS shop(
+    GuildID integer PRIMARY KEY,
+    item1 text,
+    item2 text,
+    item3 text,
+    item4 text,
+    item5 text,
+    item6 text
+);
 

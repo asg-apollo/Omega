@@ -2,9 +2,9 @@ from datetime import datetime
 from typing import Optional
 
 import disnake
-from disnake import Embed, Member, Colour, ChannelType
+from disnake import Embed, Member, ChannelType
 from disnake.ext.commands import Cog
-from ..bot import config
+from . import configuration
 
 from ..db import db
 
@@ -29,7 +29,7 @@ class Logs(Cog):
         if isFalse == 0:
             return
 
-        channel = self.bot.get_channel(config.leaveLogsChannel)
+        channel = self.bot.get_channel(configuration.leaveLogsChannel)
 
         memberRoles = (", ".join([str(r.name) for r in member.roles]))
 
@@ -228,7 +228,7 @@ class Logs(Cog):
         if isFalse == 0:
             return
 
-        if config.dmUserOnKickOrBan:
+        if configuration.dmUserOnKickOrBan:
             await member.send(f"You have been banned from {ctx.guild.name} for {reason}")
 
         record = db.record("SELECT logChannel FROM guildSettings WHERE GuildID =?", ctx.guild.id)
@@ -430,7 +430,32 @@ class Logs(Cog):
                 await channel.send(embed=embed)
         else:
             return
+    ###
 
+    ### Economy Logs
+
+    async def give_or_remove_coins_logs(self, inter,authorizer, receiver, amount):
+        balRecord = db.record("SELECT balance FROM economy WHERE (GuildID, UserID) = (?, ?)", inter.guild.id,
+                              receiver.id)
+        for (balance) in balRecord:
+            memberBalance = balance
+        record = db.record("SELECT logChannel FROM guildSettings WHERE GuildID =?", inter.guild.id)
+        for (configChannel) in record:
+            logChannel = configChannel
+        channel = inter.guild.get_channel(logChannel)
+        authorizer = inter.guild.get_member(authorizer.id)
+        receiver = inter.guild.get_member(receiver.id)
+
+        oldBalance = memberBalance - amount
+        newBalance = memberBalance
+
+        embed = Embed(title=f"Coins Changed", color=disnake.Color.dark_teal(), timestamp=datetime.now())
+        embed.add_field(name="Authorizer: ", value=authorizer.name, inline=False)
+        embed.add_field(name="Receiver: ", value=receiver.name, inline=False)
+        embed.add_field(name="Amount Changed: ", value=amount, inline=False)
+        embed.add_field(name="Old Balance: ", value=oldBalance, inline=False)
+        embed.add_field(name="New Balance: ", value=newBalance, inline=False)
+        await channel.send(embed=embed)
 
 def setup(bot):
     bot.add_cog(Logs(bot))
