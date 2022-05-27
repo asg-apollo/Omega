@@ -1,9 +1,10 @@
 from asyncio import sleep
 from glob import glob
 
-import disnake
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from disnake import Intents, Forbidden
+import disnake
+from disnake.ext import ipc, commands
 from disnake.ext.commands import Bot as BotBase, Context, BadArgument, MissingRequiredArgument
 from disnake.ext.commands import CommandNotFound, when_mentioned_or
 
@@ -12,10 +13,10 @@ from ..db import db
 OWNER_IDS = [279283820354863104]
 COGS = [path.split("\\")[-1][:-3] for path in glob("./library/cogs/*.py")]
 
-
-def get_prefix(bot, message):
-    prefix = db.field("SELECT Prefix FROM guilds WHERE GuildID = ?", message.guild.id)
-    return when_mentioned_or(prefix)(bot, message)
+#       OUTDATED[Yet To Be Removed] Pre 0.0.5
+# def get_prefix(bot, message):
+#     prefix = db.field("SELECT Prefix FROM guilds WHERE GuildID = ?", message.guild.id)
+#     return when_mentioned_or(prefix)(bot, message)
 
 
 class Ready(object):
@@ -32,19 +33,23 @@ class Ready(object):
 
 
 class Bot(BotBase):
-    def __init__(self):
-        self.ready = False
-        self.guild = 889946079188095006
-        self.scheduler = AsyncIOScheduler()
-        self.cogs_ready = Ready()
 
-        db.autosave(self.scheduler)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.ipc = ipc.Server(self, secret_key="apollo") # Creates an IPC server for the Dashboard
+        self.ready = False # Marks bot as currently not ready
+        self.scheduler = AsyncIOScheduler() # Creates an instance of the scheduler
+        self.cogs_ready = Ready() # Creates an instance of the Ready() function
+
+        db.autosave(self.scheduler) #Autosaves the database
 
         super().__init__(
-            command_prefix=get_prefix,
+            #command_prefix=get_prefix, # OUTDATED[YET TO BE REMOVED] PRE 0.0.5 
             owner_ids=OWNER_IDS,
-            intents=Intents.all()
+            intents=Intents.all() # Enables all intents for the bot
         )
+
+
 
     def run(self, version):
         self.VERSION = version
@@ -53,13 +58,13 @@ class Bot(BotBase):
         self.setup()
 
         with open("./library/bot/token", "r", encoding="utf-8") as tf:
-            self.TOKEN = tf.read()
+            self.TOKEN = tf.read() # Reads the token
 
         print("running bot...")
         super().run(self.TOKEN, reconnect=True)
 
     def setup(self):
-        for cog in COGS:
+        for cog in COGS: # Loads each module individually
             self.load_extension(f"library.cogs.{cog}")
             print(f" {cog} cog loaded")
         print("Setup complete")
@@ -94,8 +99,16 @@ class Bot(BotBase):
     async def on_connect(self):
         print("bot connected")
 
+
+
     async def on_disconnect(self):
         print("bot disconnected")
+
+
+
+    async def on_ipc_error(self, endpoint, error):
+        """Called upon an error being raised within an IPC route"""
+        print(endpoint, "raised", error)
 
     async def on_error(self, err, *args, **kwargs):
         if err == "on_command_error":
@@ -123,23 +136,22 @@ class Bot(BotBase):
 
     async def on_ready(self):
         if not self.ready:
-
-            self.guild = self.get_guild(928484198283632701)
             self.scheduler.start()
 
             self.update_db()
 
             while not self.cogs_ready.all_ready():
                 await sleep(0.5)
-
-            db.multiexec("INSERT OR IGNORE INTO exp (UserID) VALUES (?)",
-                         ((member.id,) for guild in self.guilds for member in guild.members if not member.bot))
+            
+            # EXP SYSTEM [CURRENTLY NOT IMPLENTED, NOR PLANNED]
+            # db.multiexec("INSERT OR IGNORE INTO exp (UserID) VALUES (?)",
+            #              ((member.id,) for guild in self.guilds for member in guild.members if not member.bot))
 
             self.ready = True
 
             print("bot ready")
-            game = disnake.Activity(type=disnake.ActivityType.listening, name="commands.")
-            await bot.change_presence(activity=game)
+            game = disnake.Activity(type=disnake.ActivityType.listening, name="commands.") # Sets bots activity to "Listening to commands."
+            await bot.change_presence(activity=game) # Changes to the set activity
 
         else:
             print("bot reconnected")
@@ -149,4 +161,67 @@ class Bot(BotBase):
             await self.process_commands(message)
 
 
+
 bot = Bot()
+
+
+### DASHBOARD ROUTES ###
+
+@bot.ipc.route()
+async def get_guild_count(data):
+    return len(bot.guilds)
+
+@bot.ipc.route()
+async def get_guild_ids(data):
+    final = []
+    for guild in bot.guilds:
+        final.append(guild.id)
+    return final #return guild ids to client
+
+@bot.ipc.route()
+async def get_guild(data):
+
+    guild = bot.get_guild(data.guild_id)
+    if guild is None: return None
+
+    guild_data = {
+        "name": guild.name,
+        "id": guild.id,
+        "icon_url": guild.icon.url
+    }
+    return guild_data
+
+@bot.ipc.route()
+async def get_cogs(data):
+    cogs_list = []
+    for cog in bot.cogs:
+        cogs_list.append(cog)
+    return cogs_list
+
+@bot.ipc.route()
+async def get_server_data(data):
+    guild = bot.get_guild(data.guild_id)
+    if guild is None: return None
+    channel_count = 0
+    category_count = 0
+    for channel in guild.channels:
+        channel_count += 1
+    for category in guild.categories:
+        category_count += 1
+
+    creation_date = str(guild.created_at.year) + "/" + str(guild.created_at.month) + "/" + str(guild.created_at.day)
+
+    server_data = {
+        "member_count": guild.member_count,
+        "channel_count": channel_count,
+        "category_count": category_count,
+        "owner": guild.owner.name,
+        "creation_date": creation_date
+    }
+    return server_data
+
+@bot.ipc.route()
+async def enable_module(data):
+    db.execute(f"UPDATE guildSettings SET {data.module}Module = (?) WHERE GuildID = (?)", 1, data.guild_id)
+
+bot.ipc.start()
