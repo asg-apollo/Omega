@@ -21,9 +21,15 @@ CREATE TABLE IF NOT EXISTS guildSettings(
     logChannel integer,
     welcomeChannel integer,
     suggestionChannel integer,
-    suggestModule DEFAULT TRUE,
+    suggestionsModule DEFAULT TRUE,
     moderationModule DEFAULT TRUE,
-    welcomeModule DEFAULT TRUE,
+    welcomeModule DEFAULT FALSE,
+    automodModule DEFAULT FALSE,
+    economyModule DEFAULT FALSE,
+    funModule DEFAULT TRUE,
+    logsModule DEFAULT FALSE,
+    miscModule DEFAULT TRUE,
+    randomModule DEFAULT FALSE,
     coinEmoji text,
     lotteryPrice integer DEFAULT 5
 );

@@ -1,13 +1,15 @@
 import asyncio
 from datetime import datetime
-
+from http.client import HTTPException
 import disnake
-from disnake import Member, Embed, Role
+from disnake import Member, Embed, Role, HTTPException
 from disnake.ext.commands import Cog, has_permissions, slash_command, MissingRole, MissingPermissions
-
 from library.cogs import logs
-from Development import configuration
 from library.db import db
+
+
+###         Moderation Module for Omega Bot Developed By Apollo[Ethan McKinnon]
+###         Development Year: Version 0.0.5[2022 May]
 
 
 class Moderation(Cog):
@@ -36,11 +38,11 @@ class Moderation(Cog):
             await inter.response.send_message("The Moderation Module is disabled in this guild.")
             return
 
-        await logs.Logs.log_ban(self, member, reason, configuration.leaveLogsChannel, inter) # Log the ban to the dedicated logs channel.
+        await logs.Logs.log_ban(self, inter, member, reason) # Log the ban to the dedicated logs channel.
         await member.ban(reason=reason) # Ban the member with the select reason.
         await inter.send(f"{member} Banned.")
 
-    # Kicks the mentioned member with an optional reason. Requires the kick_members permission.
+    #Kicks the mentioned member with an optional reason. Requires the kick_members permission.
     @has_permissions(kick_members=True)
     @slash_command(name="kick", description="[MODERATION] Kicks the mentioned member.")
     async def _kick(self, inter, member: Member, *, reason=''):
@@ -53,15 +55,14 @@ class Moderation(Cog):
             await inter.response.send_message("The Moderation Module is disabled in this guild.")
             return
 
-        await logs.Logs.log_kick(self, member, reason, configuration.leaveLogsChannel, inter) # Log the kick to the designated logs channel.
+        await logs.Logs.log_kick(self, inter, member, reason) # Log the kick to the designated logs channel.
         await member.kick(reason=reason) # Kick the member with the given reason.
         await inter.send(f"{member} kicked.")
 
     # Restrict a member with an optional amount of time. Requires the kick_members permission.
     @has_permissions(kick_members=True)
     @slash_command(name="restrict",
-                    description="[MODERATION] Restricts the mentioned member, removing the ability to message for x amount of "
-                    "seconds.")
+                    description="[MODERATION] Restricts the mentioned member for x amount of time.")
     async def _restricted(self, inter, member: Member, *, duration: int):
 
         record = db.record("SELECT moderationModule FROM guildSettings WHERE GuildID =?", inter.guild.id) # Check the database to see if the moderation module is enabled in the guild.
@@ -83,22 +84,23 @@ class Moderation(Cog):
         for (configRole) in record:
             restrictedRole = configRole
 
-        role = disnake.utils.get(inter.guild.roles, name=restrictedRole) # Gets the role by name
+        role = inter.guild.get_role(int(restrictedRole)) # Gets the role by id
+        print(role)
 
-        await logs.Logs.log_restrict(self, member, duration, configuration.moderationLogsChannel, inter) # Logs the restriction to the designated logs channel.
+        await logs.Logs.log_restrict(self, inter, member, duration) # Logs the restriction to the designated logs channel.
         await inter.response.send_message(f"{member.mention} has been restricted for {duration}s.") 
         await member.add_roles(role) # Add the restricted role to the member
         await asyncio.sleep(duration) # Wait until restriction is up
         await member.remove_roles(role) # Remove the restricted role from the member
         duration = 0 # Set duration back to 0
         reason = "Automatic Restriction Lifted" # Provide a reason for the unrestrict
-        await logs.Logs.log_unrestrict(self, member, reason, configuration.moderationLogsChannel, inter) # Log the unrestriction
+        await logs.Logs.log_unrestrict(self, inter, member, reason) # Log the unrestriction
 
 
-    ### PUNISHMENT COMMANDS[ENDS]
+    # ### PUNISHMENT COMMANDS[ENDS]
 
 
-    ### PUNISHMENT LIFTING COMMANDS[START]
+    # ### PUNISHMENT LIFTING COMMANDS[START]
 
     # Unbans the member with the provided id with an optional reason. Requires the ban_members permission.
     @has_permissions(ban_members=True)
@@ -119,7 +121,7 @@ class Moderation(Cog):
             user = ban_entry.user
             if user.id == member.id: # If members id is in the ban list, continue
                 await inter.guild.unban(user) # Unban the member
-                await logs.Logs.log_unban(self, memberID, reason, configuration.leaveLogsChannel, inter) # Log the unban in the designated logs channel.
+                await logs.Logs.log_unban(self, inter, memberID, reason) # Log the unban in the designated logs channel.
                 await inter.send(f"{member.display_name} has been unbanned.")
                 return
 
@@ -140,11 +142,11 @@ class Moderation(Cog):
         for (configRole) in record:
             restrictedRole = configRole
 
-        role = disnake.utils.get(inter.guild.roles, name=restrictedRole) # Gets the role object
+        role = inter.guild.get_role(restrictedRole) # Gets the role object
         if role in member.roles: # If the role is in the members roles, continue
             await inter.send(f"{member.mention} has been unrestricted.")
             await member.remove_roles(role) # Removes the restricted role from the member.
-            await logs.Logs.log_unrestrict(self, member, reason, configuration.moderationLogsChannel, inter) # Log the unrestriction to the designated logs channel
+            await logs.Logs.log_unrestrict(self, inter, member, reason) # Log the unrestriction to the designated logs channel
         else:
             await inter.send(f"{member} is not restricted!")
 
@@ -164,8 +166,13 @@ class Moderation(Cog):
         async for x in inter.channel.history(limit=amount):
             mgs.append(x)
 
-        await inter.channel.delete_messages(mgs) # Delete the list of messages
+        try:
+            await inter.channel.delete_messages(mgs) # Delete the list of messages
+        except:
+            await inter.response.send_message("Cannot clear messages over 14 days old.")
+            return
         await inter.channel.send(f"{amount} messages have been deleted in {inter.channel.mention}!", delete_after=5)
+        await logs.Logs.log_bulk_delete(self, inter, inter.channel, amount)
 
     # Gives roles with the provided user ID. Requires the moderate_members permission.
     @has_permissions(moderate_members=True)
@@ -337,24 +344,28 @@ class Moderation(Cog):
 
     ### ERROR HANDLING[STARTS]
     
-    @_ban.error
-    async def _ban_error(self, inter, exc):
-        if isinstance(exc, MissingPermissions):
-            await inter.response.send_message("You are missing the Ban Members Permission.")
+    # @_ban.error
+    # async def _ban_error(self, inter, exc):
+    #     if isinstance(exc, MissingPermissions):
+    #         await inter.response.send_message("You are missing the Ban Members Permission.")
 
-    @_clear.error
-    async def _clear_error(self, inter, exc):
-        print(exc)
+    # @_clear.error
+    # async def _clear_error(self, inter, exc):
+    #     print(exc)
+    #     if exc == disnake.HTTPException:
+    #         await inter.response.send_message("Messages over 14 days old cannot be cleared.")
+    #     else:
+    #         await inter.response.send_message("An error occured.")
 
-    @give_role_with_mention.error
-    async def give_role_with_mention_error(self, inter, exc):
-        if isinstance(exc, MissingRole):
-            await inter.response.send_message("You are missing the required role.")
+    # @give_role_with_mention.error
+    # async def give_role_with_mention_error(self, inter, exc):
+    #     if isinstance(exc, MissingRole):
+    #         await inter.response.send_message("You are missing the required role.")
 
-    @give_role_with_id.error
-    async def give_role_with_id_error(self, inter, exc):
-        if isinstance(exc, MissingRole):
-            await inter.response.send_message("You are missing the required role.")
+    # @give_role_with_id.error
+    # async def give_role_with_id_error(self, inter, exc):
+    #     if isinstance(exc, MissingRole):
+    #         await inter.response.send_message("You are missing the required role.")
 
     ### ERROR HANDLING[ENDS]
 

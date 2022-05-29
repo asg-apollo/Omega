@@ -4,6 +4,7 @@ from disnake import Embed, HTTPException
 from disnake.ext.commands import Cog
 from disnake.ext import menus
 from disnake.ext.commands import command
+from disnake.ext.menus import ListPageSource
 from disnake.utils import get
 
 

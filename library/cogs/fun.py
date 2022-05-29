@@ -85,14 +85,14 @@ class Fun(Cog):
         three_embed = Embed(title="Timer: 3 seconds!",
                             timestamp=datetime.now(), color=ctx.author.color)
         two_embed = Embed(title="Timer: 2 seconds!",
-                          timestamp=datetime.now(), color=ctx.author.color)
+                        timestamp=datetime.now(), color=ctx.author.color)
         one_embed = Embed(title="Timer: 1 seconds!",
-                          timestamp=datetime.now(), color=ctx.author.color)
+                        timestamp=datetime.now(), color=ctx.author.color)
         go_embed = Embed(title="Go!!",
-                         timestamp=datetime.now(), color=ctx.author.color)
+                        timestamp=datetime.now(), color=ctx.author.color)
 
         result_embed = Embed(title="Race", description=f"Race between {ctx.author.mention} and {member.mention}",
-                             timestamp=datetime.now(), color=ctx.author.color)
+                            timestamp=datetime.now(), color=ctx.author.color)
         result_embed.add_field(name=f"{ctx.author.display_name} ran {length}m in: ", value=f"{racer1Time} seconds")
         result_embed.add_field(name=f"{member.display_name} ran {length}m in: ", value=f"{racer2Time} seconds", inline=False)
 
