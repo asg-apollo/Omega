@@ -37,7 +37,6 @@ class Welcome(Cog):
 
     @Cog.listener()
     async def on_member_remove(self, member):
-        print(member)
         record = db.record("SELECT welcomeModule FROM guildSettings WHERE GuildID = (?)", member.guild.id)  # Check the database to see if the welcomeModule is enabled
         for onBool in record:
             isFalse = onBool

@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS guildSettings(
     logsModule DEFAULT FALSE,
     miscModule DEFAULT TRUE,
     randomModule DEFAULT FALSE,
+    ticketModule DEFAULT FALSE,
     coinEmoji text,
     lotteryPrice integer DEFAULT 5
 );
@@ -73,3 +74,8 @@ CREATE TABLE IF NOT EXISTS shop(
     item6 text
 );
 
+CREATE TABLE IF NOT EXISTS tickets(
+    GuildID integer,
+    UserID integer,
+    channelID integer
+);

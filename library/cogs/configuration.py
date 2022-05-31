@@ -22,7 +22,7 @@ class Configuration(Cog):
     Modules = option_enum({"Moderation": "moderationModule", "Suggestions": "suggestionsModule",
                            "Welcome": "welcomeModule", "AutoModeration": "automodModule",
                            "Economy": "economyModule", "Fun": "funModule", "Logs": "logsModule",
-                           "Random": "randomModule"})
+                           "Random": "randomModule", "Tickets": "ticketModule"})
 
     ModulesWithChannels = option_enum({"Logging": "logChannel", "Welcome": "welcomeChannel",
                                        "Suggestions": "suggestionChannel"})
@@ -225,6 +225,7 @@ class Configuration(Cog):
     #         elif moduleStatusList[i] == "0":
     #             embed.add_field(name=moduleList[i], value="Disabled")
     #     await inter.response.send_message(embed=embed)
+
 
 def setup(bot):
     bot.add_cog(Configuration(bot))

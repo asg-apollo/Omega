@@ -24,81 +24,78 @@ class Moderation(Cog):
 
     ###     Punishment Commands[START]
 
-
     # Bans the mentioned member with an optional reason. Requires the ban_members permission.
     @has_permissions(ban_members=True)
-    @slash_command(name="ban", description="[MODERATION] Bans the mentioned member.")
+    @slash_command(name="ban", description=" Bans the mentioned member.")
     async def _ban(self, inter, member: Member, *, reason=''):
 
-        record = db.record("SELECT moderationModule FROM guildSettings WHERE GuildID =?", inter.guild.id) # Check the database to see if the moderation module is enabled in the guild.
+        record = db.record("SELECT moderationModule FROM guildSettings WHERE GuildID =?", inter.guild.id)  # Check the database to see if the moderation module is enabled in the guild.
         for (configBool) in record:
             isFalse = configBool
             int(isFalse)
-        if isFalse == "0": # If the moderation module is disabled, send an error message and return.
+        if isFalse == "0":  # If the moderation module is disabled, send an error message and return.
             await inter.response.send_message("The Moderation Module is disabled in this guild.")
             return
 
-        await logs.Logs.log_ban(self, inter, member, reason) # Log the ban to the dedicated logs channel.
-        await member.ban(reason=reason) # Ban the member with the select reason.
+        await logs.Logs.log_ban(self, inter, member, reason)  # Log the ban to the dedicated logs channel.
+        await member.ban(reason=reason)  # Ban the member with the select reason.
         await inter.send(f"{member} Banned.")
 
-    #Kicks the mentioned member with an optional reason. Requires the kick_members permission.
+    # Kicks the mentioned member with an optional reason. Requires the kick_members permission.
     @has_permissions(kick_members=True)
-    @slash_command(name="kick", description="[MODERATION] Kicks the mentioned member.")
+    @slash_command(name="kick", description=" Kicks the mentioned member.")
     async def _kick(self, inter, member: Member, *, reason=''):
 
-        record = db.record("SELECT moderationModule FROM guildSettings WHERE GuildID =?", inter.guild.id) # Check the database to see if the moderation module is enabled in the guild.
+        record = db.record("SELECT moderationModule FROM guildSettings WHERE GuildID =?", inter.guild.id)  # Check the database to see if the moderation module is enabled in the guild.
         for (configBool) in record:
             isFalse = configBool
             int(isFalse)
-        if isFalse == "0": # If moderation module is disabled, send an error message and return.
+        if isFalse == "0":  # If moderation module is disabled, send an error message and return.
             await inter.response.send_message("The Moderation Module is disabled in this guild.")
             return
 
-        await logs.Logs.log_kick(self, inter, member, reason) # Log the kick to the designated logs channel.
-        await member.kick(reason=reason) # Kick the member with the given reason.
+        await logs.Logs.log_kick(self, inter, member, reason)  # Log the kick to the designated logs channel.
+        await member.kick(reason=reason)  # Kick the member with the given reason.
         await inter.send(f"{member} kicked.")
 
     # Restrict a member with an optional amount of time. Requires the kick_members permission.
     @has_permissions(kick_members=True)
     @slash_command(name="restrict",
-                    description="[MODERATION] Restricts the mentioned member for x amount of time.")
+                   description=" Restricts the mentioned member for x amount of time.")
     async def _restricted(self, inter, member: Member, *, duration: int):
 
-        record = db.record("SELECT moderationModule FROM guildSettings WHERE GuildID =?", inter.guild.id) # Check the database to see if the moderation module is enabled in the guild.
+        record = db.record("SELECT moderationModule FROM guildSettings WHERE GuildID =?", inter.guild.id)  # Check the database to see if the moderation module is enabled in the guild.
         for (configBool) in record:
             isFalse = configBool
             int(isFalse)
-        if isFalse == "0": #If the moderation module is disabled, send an error message and return.
+        if isFalse == "0":  # If the moderation module is disabled, send an error message and return.
             await inter.response.send_message("The Moderation Module is disabled in this guild.")
             return
 
-        db.execute("INSERT OR IGNORE INTO restricted (UserID) VALUES(?)", member.id) # Insert the member into the restricted table in the database
-        db.execute(f"UPDATE restricted SET durationTillUnrestricted = (?) WHERE UserID = (?)", duration, member.id) # Update the restricted table with the duration where the members id is.
+        db.execute("INSERT OR IGNORE INTO restricted (UserID) VALUES(?)", member.id)  # Insert the member into the restricted table in the database
+        db.execute(f"UPDATE restricted SET durationTillUnrestricted = (?) WHERE UserID = (?)", duration, member.id)  # Update the restricted table with the duration where the members id is.
         db.commit()
 
-        if duration is None: # If duration was not provided, default to 60s
+        if duration is None:  # If duration was not provided, default to 60s
             duration = 60
 
-        record = db.record("SELECT restrictedRole FROM guildSettings WHERE GuildID =?", inter.guild.id) # Grabs the restricted role from the database
+        record = db.record("SELECT restrictedRole FROM guildSettings WHERE GuildID =?", inter.guild.id)  # Grabs the restricted role from the database
         for (configRole) in record:
             restrictedRole = configRole
 
-        role = inter.guild.get_role(int(restrictedRole)) # Gets the role by id
+        role = inter.guild.get_role(int(restrictedRole))  # Gets the role by id
         print(role)
 
-        await logs.Logs.log_restrict(self, inter, member, duration) # Logs the restriction to the designated logs channel.
-        await inter.response.send_message(f"{member.mention} has been restricted for {duration}s.") 
-        await member.add_roles(role) # Add the restricted role to the member
-        await asyncio.sleep(duration) # Wait until restriction is up
-        await member.remove_roles(role) # Remove the restricted role from the member
-        duration = 0 # Set duration back to 0
-        reason = "Automatic Restriction Lifted" # Provide a reason for the unrestrict
-        await logs.Logs.log_unrestrict(self, inter, member, reason) # Log the unrestriction
-
+        await logs.Logs.log_restrict(self, inter, member, duration)  # Logs the restriction to the designated logs channel.
+        await inter.response.send_message(f"{member.mention} has been restricted for {duration}s.")
+        await member.add_roles(role)  # Add the restricted role to the member
+        await asyncio.sleep(duration)  # Wait until restriction is up
+        await member.remove_roles(role)  # Remove the restricted role from the member
+        duration = 0  # Set duration back to 0
+        reason = "Automatic Restriction Lifted"  # Provide a reason for the unrestrict
+        await logs.Logs.log_unrestrict(self, inter, member, reason)  # Log the unrestriction
 
     # ### PUNISHMENT COMMANDS[ENDS]
-
 
     # ### PUNISHMENT LIFTING COMMANDS[START]
 
@@ -107,21 +104,21 @@ class Moderation(Cog):
     @slash_command(name="unban", description="[MODERATION] Unbans the chosen user ID.")
     async def _unban(self, inter, memberID: int, *, reason=''):
 
-        record = db.record("SELECT moderationModule FROM guildSettings WHERE GuildID =?", inter.guild.id) # Check the database to see if the moderation module is enabled in the guild.
+        record = db.record("SELECT moderationModule FROM guildSettings WHERE GuildID =?", inter.guild.id)  # Check the database to see if the moderation module is enabled in the guild.
         for (configBool) in record:
             isFalse = configBool
             int(isFalse)
-        if isFalse == "0": # If moderation module is disabled, send an error and return.
+        if isFalse == "0":  # If moderation module is disabled, send an error and return.
             await inter.response.send_message("The Moderation Module is disabled in this guild.")
             return
 
-        member = await self.bot.fetch_user(memberID) # Fetch the user object by ID
-        banned_users = await self.bot.guild.bans() # Grabs the guilds ban list
-        for ban_entry in banned_users: # Checks if the user id is in the ban list.
+        member = await self.bot.fetch_user(memberID)  # Fetch the user object by ID
+        banned_users = await self.bot.guild.bans()  # Grabs the guilds ban list
+        for ban_entry in banned_users:  # Checks if the user id is in the ban list.
             user = ban_entry.user
-            if user.id == member.id: # If members id is in the ban list, continue
-                await inter.guild.unban(user) # Unban the member
-                await logs.Logs.log_unban(self, inter, memberID, reason) # Log the unban in the designated logs channel.
+            if user.id == member.id:  # If members id is in the ban list, continue
+                await inter.guild.unban(user)  # Unban the member
+                await logs.Logs.log_unban(self, inter, memberID, reason)  # Log the unban in the designated logs channel.
                 await inter.send(f"{member.display_name} has been unbanned.")
                 return
 
@@ -130,171 +127,102 @@ class Moderation(Cog):
     @slash_command(name="unrestrict", description="[MODERATION] Unrestricts the mentioned member.")
     async def _unrestrict(self, inter, member: Member, *, reason=''):
 
-        record = db.record("SELECT moderationModule FROM guildSettings WHERE GuildID =?", inter.guild.id) # Check the database to see if the moderation module is enabled in the guild.
+        record = db.record("SELECT moderationModule FROM guildSettings WHERE GuildID =?", inter.guild.id)  # Check the database to see if the moderation module is enabled in the guild.
         for (configBool) in record:
             isFalse = configBool
             int(isFalse)
-        if isFalse == "0": # If the moderation module is disabled, send an error message and return.
+        if isFalse == "0":  # If the moderation module is disabled, send an error message and return.
             await inter.response.send_message("The Moderation Module is disabled in this guild.")
             return
 
-        record = db.record("SELECT restrictedRole FROM guildRoles WHERE GuildID =?", inter.guild.id) # Grab the guilds restricted role from the database
+        record = db.record("SELECT restrictedRole FROM guildRoles WHERE GuildID =?", inter.guild.id)  # Grab the guilds restricted role from the database
         for (configRole) in record:
             restrictedRole = configRole
 
-        role = inter.guild.get_role(restrictedRole) # Gets the role object
-        if role in member.roles: # If the role is in the members roles, continue
+        role = inter.guild.get_role(restrictedRole)  # Gets the role object
+        if role in member.roles:  # If the role is in the members roles, continue
             await inter.send(f"{member.mention} has been unrestricted.")
-            await member.remove_roles(role) # Removes the restricted role from the member.
-            await logs.Logs.log_unrestrict(self, inter, member, reason) # Log the unrestriction to the designated logs channel
+            await member.remove_roles(role)  # Removes the restricted role from the member.
+            await logs.Logs.log_unrestrict(self, inter, member, reason)  # Log the unrestriction to the designated logs channel
         else:
             await inter.send(f"{member} is not restricted!")
 
     # Clears the specified amount of messages. Requires the manage_messages permission. Cannot delete messages over 14 days.
     @has_permissions(manage_messages=True)
-    @slash_command(name="clear", description="[MODERATION] Deletes the inputted amount of messages in a channel.")
+    @slash_command(name="clear", description=" Deletes the inputted amount of messages in a channel.")
     async def _clear(self, inter, amount: int):
         await inter.response.defer()
-        record = db.record("SELECT moderationModule FROM guildSettings WHERE GuildID =?", inter.guild.id) # Check the database to see if the moderation module is enabled in the guild.
-        for (configBool) in record: 
+        record = db.record("SELECT moderationModule FROM guildSettings WHERE GuildID =?", inter.guild.id)  # Check the database to see if the moderation module is enabled in the guild.
+        for (configBool) in record:
             isFalse = configBool
             int(isFalse)
-        if isFalse == "0": # If the moderation module is disabled, send a error message and return.
+        if isFalse == "0":  # If the moderation module is disabled, send a error message and return.
             await inter.response.send_message("The Moderation Module is disabled in this guild.")
             return
-        mgs = [] # Create a empty list of messages
+        mgs = []  # Create a empty list of messages
         async for x in inter.channel.history(limit=amount):
             mgs.append(x)
 
         try:
-            await inter.channel.delete_messages(mgs) # Delete the list of messages
+            await inter.channel.delete_messages(mgs)  # Delete the list of messages
         except:
             await inter.response.send_message("Cannot clear messages over 14 days old.")
             return
         await inter.channel.send(f"{amount} messages have been deleted in {inter.channel.mention}!", delete_after=5)
         await logs.Logs.log_bulk_delete(self, inter, inter.channel, amount)
 
-    # Gives roles with the provided user ID. Requires the moderate_members permission.
-    @has_permissions(moderate_members=True)
-    @slash_command(name="give_role_via_id", description="[MODERATION] Gives the role with the inputted id to the user.")
-    async def give_role_with_id(self, inter, member: Member, role_id=0):
+    @slash_command(name="role-manager")
+    async def roleManager(self, inter):
+        pass
 
-        record = db.record("SELECT moderationModule FROM guildSettings WHERE GuildID =?", inter.guild.id) # Check the database to see if the moderation module is enabled in the guild.
+    @roleManager.sub_command(name="give-role")
+    async def giveRole(self, inter, member: Member, role: Role):
+        record = db.record("SELECT moderationModule FROM guildSettings WHERE GuildID =?", inter.guild.id)  # Check the database to see if the moderation module is enabled in the guild.
         for (configBool) in record:
             isFalse = configBool
             int(isFalse)
-        if isFalse == "0": # If the moderation module is disabled, send an error message and return.
+        if isFalse == "0":  # If the moderation module is disabled, send an error message and return.
             await inter.response.send_message("The Moderation Module is disabled in this guild.")
             return
 
-        role_id = int(role_id) # Ensure the role_id is an integer
-        role = inter.guild.get_role(role_id) # Get the role object
-
-        roleList = [] # Create an empty list of roles
+        roleList = []  # Create an empty list of roles
         for storedRoles in member.roles:
-            roleList.append(storedRoles.name) # Append each of the members roles to the list
+            roleList.append(storedRoles.name)  # Append each of the members roles to the list
 
-        if role in member.roles: # Check if the role is in the members roles already
-            await inter.response.send_message(f"{member.mention} already has that role.")
-            return
-        elif role_id != 0:
-
-            await member.add_roles(role) # Add the role to the member
-            await inter.response.send_message(f"{role} has been added to {member.mention}.")
-
-            # Create and send an embed with the roles that have been changed.
-            embed = Embed(title=f"*{role}* Given To {member}", color=disnake.Color.dark_teal(), timestamp=datetime.now())
-            embed.add_field(name="Roles Before: ", value=roleList)
-            await inter.channel.send(embed=embed)
-            # TODO Add Logging to this command
-
-    # Gives a role to the mentioned member. Requires the moderate_members permission.
-    @has_permissions(moderate_members=True)
-    @slash_command(name="give_role_via_mention", description="[MODERATION] Gives the role with the mentioned role to the user.")
-    async def give_role_with_mention(self, inter, member: Member, role: Role):
-
-        record = db.record("SELECT moderationModule FROM guildSettings WHERE GuildID =?", inter.guild.id) # Check the database to see if the moderation module is enabled in the guild.
-        for (configBool) in record:
-            isFalse = configBool
-            int(isFalse)
-        if isFalse == "0": # If the moderation module is disabled, send an error message and return.
-            await inter.response.send_message("The Moderation Module is disabled in this guild.")
-            return
-
-        roleList = [] # Create an empty list of roles
-        for storedRoles in member.roles:
-            roleList.append(storedRoles.name) # Append each of the members roles to the list
-
-        if role in member.roles: # If the role is already in the member's roles, send an error and return.
+        if role in member.roles:  # If the role is already in the member's roles, send an error and return.
             await inter.response.send_message(f"{member.mention} already has that role.")
             return
         elif role is not None:
-            await member.add_roles(role) # Add the role to the member
+            await member.add_roles(role)  # Add the role to the member
             await inter.response.send_message(f"{role} has been added to {member.mention}.")
 
             # Create and send an embed with the roles that have been changed.
             embed = Embed(title=f"*{role}* Given To {member}", color=disnake.Color.dark_teal(), timestamp=datetime.now())
             embed.add_field(name="Roles Before: ", value=roleList)
             await inter.channel.send(embed=embed)
+            await logs.Logs.logRoleChangesViaCommand(self, inter, "Role Given", inter.author, member, role, roleList)
             # TODO Add Logging to the command
 
-    # Remove a role via ID from a member. Requires the moderate_members permission.
-    @has_permissions(moderate_members=True)
-    @slash_command(name="remove_role_via_id", description="Removes the role with the inputted id from the user.")
-    async def remove_role_with_id(self, inter, member: Member, role_id=0):
-
-        record = db.record("SELECT moderationModule FROM guildSettings WHERE GuildID =?", inter.guild.id) # Check the database to see if the moderation module is enabled in the guild.
-        for (configBool) in record:
-            isFalse = configBool
-            int(isFalse)
-        if isFalse == "0": # If the moderation module is disabled, send an error and return.
-            await inter.response.send_message("The Moderation Module is disabled in this guild.")
-            return
-
-        roleList = [] # Create an empty list of roles
-        for storedRoles in member.roles:
-            roleList.append(storedRoles.name) # Append the member's roles to the list
-
-        role_id = int(role_id) # Ensure that the ID is an integer
-        role = inter.guild.get_role(role_id) # Get the role object
-
-        if role not in member.roles: # If role is not in member's roles, send an error and return.
-            await inter.response.send_message(f"{member.mention} doesn't have that role.")
-            return
-        elif role_id != 0:
-            await member.remove_roles(role) # Remove the role from the member.
-            await inter.response.send_message(f"{role} has been removed from {member.mention}.")
-
-            # Create and send an embed with the roles that have been changed.
-            embed = Embed(title=f"*{role}* Removed From {member}", color=disnake.Color.red(), timestamp=datetime.now())
-            embed.add_field(name="Roles Before Removal: ", value=roleList)
-            await inter.channel.send(embed=embed)
-            # TODO Add logging to the command
-
-    # Remove a role via mentioning the role. Requires the moderate_members permission.
-    @has_permissions(moderate_members=True)
-    @slash_command(name="remove_role_via_mention",
-                    description="[MODERATION] Removes the role with the mentioned role from the user.")
-    async def remove_role_with_mention(self, inter, member: Member, role: Role):
-
-        record = db.record("SELECT moderationModule FROM guildSettings WHERE GuildID =?", inter.guild.id) # Check the database to see if the moderation module is enabled in the guild.
+    @roleManager.sub_command(name="remove-role")
+    async def removeRole(self, inter, member: Member, role: Role):
+        record = db.record("SELECT moderationModule FROM guildSettings WHERE GuildID =?", inter.guild.id)  # Check the database to see if the moderation module is enabled in the guild.
         for (configBool) in record:
             isFalse = configBool
             int(isFalse)
 
-        if isFalse == "0": # If moderation module is disabled, send an error and return.
+        if isFalse == "0":  # If moderation module is disabled, send an error and return.
             await inter.response.send_message("The Moderation Module is disabled in this guild.")
             return
 
-        if role not in member.roles: # If the role is not in the member's roles, send an error and return.
+        if role not in member.roles:  # If the role is not in the member's roles, send an error and return.
             await inter.response.send_message(f"{member.mention} doesn't have that role.")
             return
         elif role is not None:
-            roleList = [] # Create an empty role list.
+            roleList = []  # Create an empty role list.
             for storedRoles in member.roles:
-                roleList.append(storedRoles.name) # Append the member's roles to the list.
+                roleList.append(storedRoles.name)  # Append the member's roles to the list.
 
-            await member.remove_roles(role) # Remove the role from the member.
+            await member.remove_roles(role)  # Remove the role from the member.
             await inter.response.send_message(f"{role} has been removed from {member.mention}.")
 
             # Create and send an embed with the roles that have been changed.
@@ -303,29 +231,25 @@ class Moderation(Cog):
             await inter.channel.send(embed=embed)
             # TODO Add logging to the command
 
-    # Remove all roles from a member. Requires the moderate_members permission.
-    @has_permissions(moderate_members=True)
-    @slash_command(name="remove_all_roles",
-                    description="Removes all roles from the user.")
-    async def remove_all_roles(self, inter, member: Member):
-
-        record = db.record("SELECT moderationModule FROM guildSettings WHERE GuildID =?", inter.guild.id) # Check the database to see if the moderation module is enabled in the guild.
+    @roleManager.sub_command(name="remove-all-roles")
+    async def removeAllRoles(self, inter, member: Member):
+        record = db.record("SELECT moderationModule FROM guildSettings WHERE GuildID =?", inter.guild.id)  # Check the database to see if the moderation module is enabled in the guild.
         for (configBool) in record:
             isFalse = configBool
             int(isFalse)
-        if isFalse == "0": # If the moderatation module is disabled, send an error and return.
+        if isFalse == "0":  # If the moderation module is disabled, send an error and return.
             await inter.response.send_message("The Moderation Module is disabled in this guild.")
             return
 
-        roleList = [] # Create an empty role list
+        roleList = []  # Create an empty role list
         for storedRoles in member.roles:
-            roleList.append(storedRoles.name) # Append the member's roles to the list.
+            roleList.append(storedRoles.name)  # Append the member's roles to the list.
 
-        if member.roles == 1: # If the member only has the @everyone role, send an error and return.
+        if member.roles == 1:  # If the member only has the @everyone role, send an error and return.
             await inter.response.send_message(f"{member.mention} doesn't have any roles.")
             return
 
-        for role in member.roles: # For each role in the member's roles, try to remove the role.
+        for role in member.roles:  # For each role in the member's roles, try to remove the role.
             try:
                 await member.remove_roles(role)
             except:
@@ -337,13 +261,181 @@ class Moderation(Cog):
         embed = Embed(title=f"*All roles* Removed From {member}", color=disnake.Color.red(), timestamp=datetime.now())
         embed.add_field(name="Roles Before Removal: ", value=roleList)
         await inter.channel.send(embed=embed)
-        #TODO Add logging to the command
-    
+        # TODO Add logging to the command
+
+    # VERSION 0.5.5 [REMOVED]
+    # # Gives roles with the provided user ID. Requires the moderate_members permission.
+    # @has_permissions(moderate_members=True)
+    # @slash_command(name="give-role-via-id", description=" Gives the role with the inputted id to the user.")
+    # async def give_role_with_id(self, inter, member: Member, role_id=0):
+    #
+    #     record = db.record("SELECT moderationModule FROM guildSettings WHERE GuildID =?", inter.guild.id)  # Check the database to see if the moderation module is enabled in the guild.
+    #     for (configBool) in record:
+    #         isFalse = configBool
+    #         int(isFalse)
+    #     if isFalse == "0":  # If the moderation module is disabled, send an error message and return.
+    #         await inter.response.send_message("The Moderation Module is disabled in this guild.")
+    #         return
+    #
+    #     role_id = int(role_id)  # Ensure the role_id is an integer
+    #     role = inter.guild.get_role(role_id)  # Get the role object
+    #
+    #     roleList = []  # Create an empty list of roles
+    #     for storedRoles in member.roles:
+    #         roleList.append(storedRoles.name)  # Append each of the members roles to the list
+    #
+    #     if role in member.roles:  # Check if the role is in the members roles already
+    #         await inter.response.send_message(f"{member.mention} already has that role.")
+    #         return
+    #     elif role_id != 0:
+    #
+    #         await member.add_roles(role)  # Add the role to the member
+    #         await inter.response.send_message(f"{role} has been added to {member.mention}.")
+    #
+    #         # Create and send an embed with the roles that have been changed.
+    #         embed = Embed(title=f"*{role}* Given To {member}", color=disnake.Color.dark_teal(), timestamp=datetime.now())
+    #         embed.add_field(name="Roles Before: ", value=roleList)
+    #         await inter.channel.send(embed=embed)
+    #         await logs.Logs.logRoleChangesViaCommand(self, inter, "Role Given", inter.author, member, role, roleList)
+    #         # TODO Add Logging to this command
+    #
+    # # Gives a role to the mentioned member. Requires the moderate_members permission.
+    # @has_permissions(moderate_members=True)
+    # @slash_command(name="give-role-via-mention", description=" Gives the role with the mentioned role to the user.")
+    # async def give_role_with_mention(self, inter, member: Member, role: Role):
+    #
+    #     record = db.record("SELECT moderationModule FROM guildSettings WHERE GuildID =?", inter.guild.id)  # Check the database to see if the moderation module is enabled in the guild.
+    #     for (configBool) in record:
+    #         isFalse = configBool
+    #         int(isFalse)
+    #     if isFalse == "0":  # If the moderation module is disabled, send an error message and return.
+    #         await inter.response.send_message("The Moderation Module is disabled in this guild.")
+    #         return
+    #
+    #     roleList = []  # Create an empty list of roles
+    #     for storedRoles in member.roles:
+    #         roleList.append(storedRoles.name)  # Append each of the members roles to the list
+    #
+    #     if role in member.roles:  # If the role is already in the member's roles, send an error and return.
+    #         await inter.response.send_message(f"{member.mention} already has that role.")
+    #         return
+    #     elif role is not None:
+    #         await member.add_roles(role)  # Add the role to the member
+    #         await inter.response.send_message(f"{role} has been added to {member.mention}.")
+    #
+    #         # Create and send an embed with the roles that have been changed.
+    #         embed = Embed(title=f"*{role}* Given To {member}", color=disnake.Color.dark_teal(), timestamp=datetime.now())
+    #         embed.add_field(name="Roles Before: ", value=roleList)
+    #         await inter.channel.send(embed=embed)
+    #         await logs.Logs.logRoleChangesViaCommand(self, inter, "Role Given", inter.author, member, role, roleList)
+    #         # TODO Add Logging to the command
+    #
+    # Remove a role via ID from a member. Requires the moderate_members permission.
+    #
+    # @has_permissions(moderate_members=True)
+    # @slash_command(name="remove-role-via-id", description="Removes the role with the inputted id from the user.")
+    # async def remove_role_with_id(self, inter, member: Member, role_id=0):
+    #
+    #     record = db.record("SELECT moderationModule FROM guildSettings WHERE GuildID =?", inter.guild.id)  # Check the database to see if the moderation module is enabled in the guild.
+    #     for (configBool) in record:
+    #         isFalse = configBool
+    #         int(isFalse)
+    #     if isFalse == "0":  # If the moderation module is disabled, send an error and return.
+    #         await inter.response.send_message("The Moderation Module is disabled in this guild.")
+    #         return
+    #
+    #     roleList = []  # Create an empty list of roles
+    #     for storedRoles in member.roles:
+    #         roleList.append(storedRoles.name)  # Append the member's roles to the list
+    #
+    #     role_id = int(role_id)  # Ensure that the ID is an integer
+    #     role = inter.guild.get_role(role_id)  # Get the role object
+    #
+    #     if role not in member.roles:  # If role is not in member's roles, send an error and return.
+    #         await inter.response.send_message(f"{member.mention} doesn't have that role.")
+    #         return
+    #     elif role_id != 0:
+    #         await member.remove_roles(role)  # Remove the role from the member.
+    #         await inter.response.send_message(f"{role} has been removed from {member.mention}.")
+    #
+    #         # Create and send an embed with the roles that have been changed.
+    #         embed = Embed(title=f"*{role}* Removed From {member}", color=disnake.Color.red(), timestamp=datetime.now())
+    #         embed.add_field(name="Roles Before Removal: ", value=roleList)
+    #         await inter.channel.send(embed=embed)
+    #         # TODO Add logging to the command
+    #
+    # # Remove a role via mentioning the role. Requires the moderate_members permission.
+    # @has_permissions(moderate_members=True)
+    # @slash_command(name="remove-role-via-mention",
+    #                description=" Removes the role with the mentioned role from the user.")
+    # async def remove_role_with_mention(self, inter, member: Member, role: Role):
+    #
+    #     record = db.record("SELECT moderationModule FROM guildSettings WHERE GuildID =?", inter.guild.id)  # Check the database to see if the moderation module is enabled in the guild.
+    #     for (configBool) in record:
+    #         isFalse = configBool
+    #         int(isFalse)
+    #
+    #     if isFalse == "0":  # If moderation module is disabled, send an error and return.
+    #         await inter.response.send_message("The Moderation Module is disabled in this guild.")
+    #         return
+    #
+    #     if role not in member.roles:  # If the role is not in the member's roles, send an error and return.
+    #         await inter.response.send_message(f"{member.mention} doesn't have that role.")
+    #         return
+    #     elif role is not None:
+    #         roleList = []  # Create an empty role list.
+    #         for storedRoles in member.roles:
+    #             roleList.append(storedRoles.name)  # Append the member's roles to the list.
+    #
+    #         await member.remove_roles(role)  # Remove the role from the member.
+    #         await inter.response.send_message(f"{role} has been removed from {member.mention}.")
+    #
+    #         # Create and send an embed with the roles that have been changed.
+    #         embed = Embed(title=f"*{role}* Removed From {member}", color=disnake.Color.red(), timestamp=datetime.now())
+    #         embed.add_field(name="Roles Before Removal: ", value=roleList)
+    #         await inter.channel.send(embed=embed)
+    #         # TODO Add logging to the command
+    #
+    # # Remove all roles from a member. Requires the moderate_members permission.
+    # @has_permissions(moderate_members=True)
+    # @slash_command(name="remove-all-roles",
+    #                description="Removes all roles from the user.")
+    # async def remove_all_roles(self, inter, member: Member):
+    #
+    #     record = db.record("SELECT moderationModule FROM guildSettings WHERE GuildID =?", inter.guild.id)  # Check the database to see if the moderation module is enabled in the guild.
+    #     for (configBool) in record:
+    #         isFalse = configBool
+    #         int(isFalse)
+    #     if isFalse == "0":  # If the moderatation module is disabled, send an error and return.
+    #         await inter.response.send_message("The Moderation Module is disabled in this guild.")
+    #         return
+    #
+    #     roleList = []  # Create an empty role list
+    #     for storedRoles in member.roles:
+    #         roleList.append(storedRoles.name)  # Append the member's roles to the list.
+    #
+    #     if member.roles == 1:  # If the member only has the @everyone role, send an error and return.
+    #         await inter.response.send_message(f"{member.mention} doesn't have any roles.")
+    #         return
+    #
+    #     for role in member.roles:  # For each role in the member's roles, try to remove the role.
+    #         try:
+    #             await member.remove_roles(role)
+    #         except:
+    #             print(f"Can't remove the role {role}")
+    #
+    #     await inter.response.send_message(f"All roles have been removed from {member.mention}.")
+    #
+    #     # Create and send an embed with all roles that have been changed.
+    #     embed = Embed(title=f"*All roles* Removed From {member}", color=disnake.Color.red(), timestamp=datetime.now())
+    #     embed.add_field(name="Roles Before Removal: ", value=roleList)
+    #     await inter.channel.send(embed=embed)
+    #     # TODO Add logging to the command
 
     ### PUNISHMENT LIFTING COMMANDS[END]
 
     ### ERROR HANDLING[STARTS]
-    
+
     # @_ban.error
     # async def _ban_error(self, inter, exc):
     #     if isinstance(exc, MissingPermissions):
@@ -369,8 +461,8 @@ class Moderation(Cog):
 
     ### ERROR HANDLING[ENDS]
 
-
     ### YET TO BE ADDED
+
     """ VERSION: 0.5.0 
 
     @slash_command(name="mass-change-nicknames", scope=889946079188095006)

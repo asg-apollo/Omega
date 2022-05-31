@@ -52,7 +52,7 @@ class Suggestions(Cog):
     ###         ADMIN COMMANDS[START]
 
     # Get all the suggestions and view them.
-    @slash_command(name="seeAllSuggestions")
+    @slash_command(name="see-All-Suggestions")
     async def seeAllSuggestions(self, inter, page_number: int):
         record = db.record("SELECT modRole FROM guildSettings WHERE GuildID =?", inter.guild.id) # Get the minimum moderator role from the database
         for (role) in record:
@@ -110,7 +110,7 @@ class Suggestions(Cog):
             await inter.response.send_message(embed=embed) # Send the embed
 
     # Update a status | should be used after using seeAllSuggestions
-    @slash_command(name="updateStatus")
+    @slash_command(name="update-Status")
     async def updateStatus(self, inter, suggestion_number, new_status):
         record = db.record("SELECT modRole FROM guildSettings WHERE GuildID =?", inter.guild.id)
         for (role) in record:
@@ -145,7 +145,7 @@ class Suggestions(Cog):
             await inter.response.send_message(embed=embed) # Send the embed
 
     # Close a suggestion | Should be used after seeAllSuggestions
-    @slash_command(name="closeSuggestion")
+    @slash_command(name="close-Suggestion")
     async def closeSuggestion(self, inter, suggestion_number):
         record = db.record("SELECT modRole FROM guildSettings WHERE GuildID =?", inter.guild.id)
         for (role) in record:

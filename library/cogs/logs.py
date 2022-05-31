@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional
 
 import disnake
-from disnake import Embed, Member, ChannelType, TextChannel
+from disnake import Embed, Member, ChannelType, TextChannel, Role
 from disnake.ext.commands import Cog
 from library.cogs import configuration
 
@@ -26,11 +26,11 @@ class Logs(Cog):
     @Cog.listener()
     async def on_member_leave(self, member):
 
-        record = db.record("SELECT logMemberLeave FROM guilds WHERE GuildID =?", member.guild.id) # Check if logMemberLeave is enabled in the database
+        record = db.record("SELECT logMemberLeave FROM guilds WHERE GuildID =?", member.guild.id)  # Check if logMemberLeave is enabled in the database
         for (configBool) in record:
             isFalse = configBool
 
-        if isFalse == 0: # If logMemberLeave is disabled, return
+        if isFalse == 0:  # If logMemberLeave is disabled, return
             return
 
         record = db.record("SELECT logChannel FROM guildSettings WHERE GuildID = (?)", member.guild.id)
@@ -55,16 +55,16 @@ class Logs(Cog):
 
     @Cog.listener()
     async def on_message_delete(self, message):
-        record = db.record("SELECT logMessages FROM guilds WHERE GuildID =?", message.guild.id) # Checks the database to see if logMessages is enabled in the guild
+        record = db.record("SELECT logMessages FROM guilds WHERE GuildID =?", message.guild.id)  # Checks the database to see if logMessages is enabled in the guild
         for (configBool) in record:
             isFalse = configBool
 
-        if isFalse == 0: # If logMessages is disabled, return
+        if isFalse == 0:  # If logMessages is disabled, return
             return
-        if message.author.bot: # If the message was sent by a bot, return
+        if message.author.bot:  # If the message was sent by a bot, return
             return
 
-        record = db.record("SELECT logChannel FROM guildSettings WHERE GuildID =?", message.guild.id) # Select the logChannel from the database
+        record = db.record("SELECT logChannel FROM guildSettings WHERE GuildID =?", message.guild.id)  # Select the logChannel from the database
         for (configChannel) in record:
             logChannel = configChannel
         channel = self.bot.get_channel(logChannel)
@@ -80,15 +80,15 @@ class Logs(Cog):
 
     @Cog.listener()
     async def on_message_edit(self, beforeMessage, afterMessage):
-        record = db.record("SELECT logMessages FROM guilds WHERE GuildID =?", beforeMessage.guild.id) # Checks the database to see if logMessages is enabled in the guild
+        record = db.record("SELECT logMessages FROM guilds WHERE GuildID =?", beforeMessage.guild.id)  # Checks the database to see if logMessages is enabled in the guild
         for (configBool) in record:
             isFalse = configBool
-        if isFalse == 0: # If logMessages is disabled, return
+        if isFalse == 0:  # If logMessages is disabled, return
             return
-        if beforeMessage.author.bot: # If the message was sent by a bot, return
+        if beforeMessage.author.bot:  # If the message was sent by a bot, return
             return
 
-        record = db.record("SELECT logChannel FROM guildSettings WHERE GuildID =?", beforeMessage.guild.id) # Select the logChannel from the database.
+        record = db.record("SELECT logChannel FROM guildSettings WHERE GuildID =?", beforeMessage.guild.id)  # Select the logChannel from the database.
         for (configChannel) in record:
             logChannel = configChannel
         channel = self.bot.get_channel(logChannel)
@@ -104,14 +104,13 @@ class Logs(Cog):
         embed.set_footer(text=f"Message ID: {beforeMessage.id}")
         await channel.send(embed=embed)
 
-    
-    async def log_bulk_delete(self, inter, channelObj: TextChannel,amount: int):
-        record = db.record("SELECT logMessages FROM guilds WHERE GuildID =?", inter.guild.id) # Checks the database to see if logMessages is enabled in the guild
+    async def log_bulk_delete(self, inter, channelObj: TextChannel, amount: int):
+        record = db.record("SELECT logMessages FROM guilds WHERE GuildID =?", inter.guild.id)  # Checks the database to see if logMessages is enabled in the guild
         for (configBool) in record:
             isFalse = configBool
-        if isFalse == 0: # If log messages is disabled, return
+        if isFalse == 0:  # If log messages is disabled, return
             return
-        record = db.record("SELECT logChannel FROM guildSettings WHERE GuildID =?", inter.guild.id) # Select the logChannel from the database
+        record = db.record("SELECT logChannel FROM guildSettings WHERE GuildID =?", inter.guild.id)  # Select the logChannel from the database
         for (configChannel) in record:
             logChannel = configChannel
         channel = self.bot.get_channel(logChannel)
@@ -129,11 +128,11 @@ class Logs(Cog):
 
     @Cog.listener()
     async def on_guild_channel_create(self, createdChannel):
-        record = db.record("SELECT logGuildChanges FROM guilds WHERE GuildID =?", createdChannel.guild.id) # Check the database to see if logGuildChanges
+        record = db.record("SELECT logGuildChanges FROM guilds WHERE GuildID =?", createdChannel.guild.id)  # Check the database to see if logGuildChanges
         for (configBool) in record:
             isFalse = configBool
 
-        if isFalse == 0: # If logGuildChanges is disabled, return
+        if isFalse == 0:  # If logGuildChanges is disabled, return
             return
 
         channelType = None
@@ -144,7 +143,7 @@ class Logs(Cog):
         if createdChannel.type == ChannelType.text:
             channelType = "Text"
 
-        record = db.record("SELECT logChannel FROM guildSettings WHERE GuildID =?", createdChannel.guild.id) # Select the logChannel from the database
+        record = db.record("SELECT logChannel FROM guildSettings WHERE GuildID =?", createdChannel.guild.id)  # Select the logChannel from the database
         for (configChannel) in record:
             logChannel = configChannel
         channel = self.bot.get_channel(logChannel)
@@ -159,11 +158,11 @@ class Logs(Cog):
 
     @Cog.listener()
     async def on_guild_channel_delete(self, deletedChannel):
-        record = db.record("SELECT logGuildChanges FROM guilds WHERE GuildID =?", deletedChannel.guild.id) # Check the database to see if logGuildChanges is enabled
+        record = db.record("SELECT logGuildChanges FROM guilds WHERE GuildID =?", deletedChannel.guild.id)  # Check the database to see if logGuildChanges is enabled
         for (configBool) in record:
             isFalse = configBool
 
-        if isFalse == 0: # If logGuildChanges is disabled, return
+        if isFalse == 0:  # If logGuildChanges is disabled, return
             return
 
         channelType = None
@@ -174,20 +173,19 @@ class Logs(Cog):
         if deletedChannel.type == ChannelType.text:
             channelType = "Text"
 
-        record = db.record("SELECT logChannel FROM guildSettings WHERE GuildID =?", deletedChannel.guild.id) # Select the logChannel from the database
+        record = db.record("SELECT logChannel FROM guildSettings WHERE GuildID =?", deletedChannel.guild.id)  # Select the logChannel from the database
         for (configChannel) in record:
             logChannel = configChannel
         channel = self.bot.get_channel(logChannel)
 
         # Create and send an embed logging the channel being deleted
         embed = Embed(title=f"{channelType} Channel Deleted", color=disnake.Color.red(),
-                        timestamp=datetime.now())
+                      timestamp=datetime.now())
         embed.add_field(name="Deleter: ", value=entry.user.mention)
         embed.set_author(name=entry.user, icon_url=entry.user.avatar)
         embed.add_field(name="Channel Name: ", value=deletedChannel)
         embed.set_footer(text=f"Channel ID: {deletedChannel.id}")
         await channel.send(embed=embed)
-
 
     # YET TO BE IMPLEMENTED [VERSION 0.5.0]
     """
@@ -232,19 +230,19 @@ class Logs(Cog):
     ###         MODERATION LOGS [START]
 
     async def log_ban(self, inter, member: Member, reason: str):
-        record = db.record("SELECT logModerationActions FROM guilds WHERE GuildID =?", member.guild.id) # Check the database to see if logModerationActions is enabled
+        record = db.record("SELECT logModerationActions FROM guilds WHERE GuildID =?", member.guild.id)  # Check the database to see if logModerationActions is enabled
         for (configBool) in record:
             isFalse = configBool
 
-        if isFalse == 0: # If logModerationActions is disabled, return
+        if isFalse == 0:  # If logModerationActions is disabled, return
             return
 
-        record = db.record("SELECT logChannel FROM guildSettings WHERE GuildID =?", inter.guild.id) # Get the logChannel from the database
+        record = db.record("SELECT logChannel FROM guildSettings WHERE GuildID =?", inter.guild.id)  # Get the logChannel from the database
         for (configChannel) in record:
             logChannel = configChannel
         channel = self.bot.get_channel(logChannel)
 
-        memberRoles = (", ".join([str(r.name) for r in member.roles])) # Create a list of the users roles
+        memberRoles = (", ".join([str(r.name) for r in member.roles]))  # Create a list of the users roles
 
         # Create and send an embed giving details about the ban
         embed = Embed(title="Member Banned", color=disnake.Color.red(), timestamp=datetime.now())
@@ -254,28 +252,28 @@ class Logs(Cog):
         embed.set_footer(text=f"ID: {member.id}. Reason: {reason}")
         await channel.send(embed=embed)
 
-    async def log_kick(self, inter, member: Member, reason: str,):
+    async def log_kick(self, inter, member: Member, reason: str, ):
 
-        record = db.record("SELECT logModerationActions FROM guilds WHERE GuildID =?", member.guild.id) # Check the database to see if logModerationActions is enabled
+        record = db.record("SELECT logModerationActions FROM guilds WHERE GuildID =?", member.guild.id)  # Check the database to see if logModerationActions is enabled
         for (configBool) in record:
             isFalse = configBool
 
-        if isFalse == 0: # If logModerationActions is disabled, return
+        if isFalse == 0:  # If logModerationActions is disabled, return
             return
 
-        record = db.record("SELECT dmUserOnKickOrBan FROM guilds WHERE GuildID =?", member.guild.id) # Check the database to see if dmUserOnKickOrBan is enabled
+        record = db.record("SELECT dmUserOnKickOrBan FROM guilds WHERE GuildID =?", member.guild.id)  # Check the database to see if dmUserOnKickOrBan is enabled
         for (configBool) in record:
             isFalse = configBool
-        if isFalse == 1: # If dmUserOnKickOrBan is enabled, dm the user about the kick.
+        if isFalse == 1:  # If dmUserOnKickOrBan is enabled, dm the user about the kick.
             await member.send(
                 f"You have been kicked from {inter.guild.name} for {reason}. Feel free to join back and follow our rules!")
 
-        record = db.record("SELECT logChannel FROM guildSettings WHERE GuildID =?", inter.guild.id) # Get the logChannel from the database
+        record = db.record("SELECT logChannel FROM guildSettings WHERE GuildID =?", inter.guild.id)  # Get the logChannel from the database
         for (configChannel) in record:
             logChannel = configChannel
         channel = self.bot.get_channel(logChannel)
 
-        memberRoles = (", ".join([str(r.name) for r in member.roles])) # Create a list of the members roles
+        memberRoles = (", ".join([str(r.name) for r in member.roles]))  # Create a list of the members roles
 
         # Create and send an embed with details about the kick.
         embed = Embed(title="Member Kicked", color=disnake.Color.red(), timestamp=datetime.now())
@@ -285,18 +283,18 @@ class Logs(Cog):
         embed.set_footer(text=f"ID: {member.id}. Reason: {reason}")
         await channel.send(embed=embed)
 
-    async def log_unban(self, inter , memberID: int, reason: str):
+    async def log_unban(self, inter, memberID: int, reason: str):
 
-        record = db.record("SELECT logModerationActions FROM guilds WHERE GuildID =?", member.guild.id) # Check the database to see if logModerationActions is enabled
+        record = db.record("SELECT logModerationActions FROM guilds WHERE GuildID =?", member.guild.id)  # Check the database to see if logModerationActions is enabled
         for (configBool) in record:
             isFalse = configBool
 
-        if isFalse == 0: # If logModerationActions is disabled, return
+        if isFalse == 0:  # If logModerationActions is disabled, return
             return
 
-        member = await self.bot.fetch_user(memberID) # Fetch the user object
+        member = await self.bot.fetch_user(memberID)  # Fetch the user object
 
-        record = db.record("SELECT logChannel FROM guildSettings WHERE GuildID =?", inter.guild.id) # Get the logChannel from the database
+        record = db.record("SELECT logChannel FROM guildSettings WHERE GuildID =?", inter.guild.id)  # Get the logChannel from the database
         for (configChannel) in record:
             logChannel = configChannel
         channel = self.bot.get_channel(logChannel)
@@ -309,25 +307,25 @@ class Logs(Cog):
         await channel.send(embed=embed)
 
     async def log_restrict(self, inter, member: Member, duration: int):
-        record = db.record("SELECT logModerationActions FROM guilds WHERE GuildID =?", member.guild.id) # Check the database to see if logModerationActions is enabled
+        record = db.record("SELECT logModerationActions FROM guilds WHERE GuildID =?", member.guild.id)  # Check the database to see if logModerationActions is enabled
         for (configBool) in record:
             isFalse = configBool
 
-        if isFalse == 0: # If logModerationActions is disabled, return
+        if isFalse == 0:  # If logModerationActions is disabled, return
             return
 
-        record = db.record("SELECT dmUserOnKickOrBan FROM guilds WHERE GuildID =?", member.guild.id) # Check the database to see if dmUserOnKickOrBan is enabled.
+        record = db.record("SELECT dmUserOnKickOrBan FROM guilds WHERE GuildID =?", member.guild.id)  # Check the database to see if dmUserOnKickOrBan is enabled.
         for (configBool) in record:
             isFalse = configBool
-        if isFalse == 1: # If dmUserOnKickOrBan is enabled, message the user
+        if isFalse == 1:  # If dmUserOnKickOrBan is enabled, message the user
             await member.send(
                 f"You have been restricted in {inter.guild.name} for {duration}. Once the timer is up feel free to continue talking!")
 
-        record = db.record("SELECT logChannel FROM guildSettings WHERE GuildID =?", inter.guild.id) # Get the logChannel from the database
+        record = db.record("SELECT logChannel FROM guildSettings WHERE GuildID =?", inter.guild.id)  # Get the logChannel from the database
         for (configChannel) in record:
             logChannel = configChannel
         channel = self.bot.get_channel(logChannel)
-        
+
         # Create and send an embed with information about the restriction.
         embed = Embed(title="Member Restriction Placed", color=disnake.Color.red(), timestamp=datetime.now())
         embed.set_thumbnail(url=member.avatar)
@@ -336,21 +334,21 @@ class Logs(Cog):
         await channel.send(embed=embed)
 
     async def log_unrestrict(self, inter, member: Member, reason: Optional[str]):
-        record = db.record("SELECT logModerationActions FROM guilds WHERE GuildID =?", member.guild.id) # Check the database to see if logModerationActions is enabled
+        record = db.record("SELECT logModerationActions FROM guilds WHERE GuildID =?", member.guild.id)  # Check the database to see if logModerationActions is enabled
         for (configBool) in record:
             isFalse = configBool
 
-        if isFalse == 0: # If logModerationActions is disabled, return
+        if isFalse == 0:  # If logModerationActions is disabled, return
             return
 
-        record = db.record("SELECT dmUserOnKickOrBan FROM guilds WHERE GuildID =?", member.guild.id) # Check the database to see if dmUserOnKickOrBan is enabled
+        record = db.record("SELECT dmUserOnKickOrBan FROM guilds WHERE GuildID =?", member.guild.id)  # Check the database to see if dmUserOnKickOrBan is enabled
         for (configBool) in record:
             isFalse = configBool
-        if isFalse == 1: # If dmUserOnKickOrBan is enabled, message the user.
+        if isFalse == 1:  # If dmUserOnKickOrBan is enabled, message the user.
             await member.send(
                 f"You have been unrestricted in {inter.guild.name}. Feel free to continue talking!")
 
-        record = db.record("SELECT logChannel FROM guildSettings WHERE GuildID =?", inter.guild.id) # Get the logChannel from the database
+        record = db.record("SELECT logChannel FROM guildSettings WHERE GuildID =?", inter.guild.id)  # Get the logChannel from the database
         for (configChannel) in record:
             logChannel = configChannel
         channel = self.bot.get_channel(logChannel)
@@ -360,6 +358,28 @@ class Logs(Cog):
         embed.set_thumbnail(url=member.avatar)
         embed.add_field(name=f"{member.name}#{member.discriminator}", value=chr(173), inline=True)
         embed.set_footer(text=f"ID: {member.id}. Reason: {reason}")
+        await channel.send(embed=embed)
+
+    async def logRoleChangesViaCommand(self, inter, type: str, moderator: Member ,member: Member, role: Role, roleList: list):
+        record = db.record("SELECT logModerationActions FROM guilds WHERE GuildID =?", member.guild.id)  # Check the database to see if logModerationActions is enabled
+        for (configBool) in record:
+            isFalse = configBool
+
+        if isFalse == 0:  # If logModerationActions is disabled, return
+            return
+
+        record = db.record("SELECT logChannel FROM guildSettings WHERE GuildID =?", inter.guild.id)  # Get the logChannel from the database
+        for (configChannel) in record:
+            logChannel = configChannel
+        channel = self.bot.get_channel(logChannel)
+
+        embed = Embed(title=f"{type}", color=disnake.Color.dark_teal(), timestamp=datetime.utcnow())
+        embed.set_footer(text=f"Member ID: {member.id}, Moderator ID: {moderator.id} ")
+        embed.add_field(name="Member Name: ", value=member, inline=False)
+        embed.add_field(name=f"{type}: ", value=f"{role.name}", inline=False)
+        embed.add_field(name="Role List Before: ", value=roleList, inline=False)
+        embed.add_field(name="Moderator: ", value=moderator, inline=False)
+
         await channel.send(embed=embed)
 
     ###
@@ -380,8 +400,6 @@ class Logs(Cog):
 
     #     if isFalse == 0:
     #         return
-
-
 
     #     embed = Embed(title=f"{typeOfChange} Change", color=disnake.Color.dark_teal(), timestamp=datetime.now())
     #     if typeOfChange == "Avatar":
@@ -406,27 +424,27 @@ class Logs(Cog):
     @Cog.listener()
     async def on_member_update(self, before, after):
 
-        record = db.record("SELECT logUserUpdates FROM guilds WHERE GuildID =?", before.guild.id) # Check the database to see if logUserUpdates is enabled.
+        record = db.record("SELECT logUserUpdates FROM guilds WHERE GuildID =?", before.guild.id)  # Check the database to see if logUserUpdates is enabled.
         for (configBool) in record:
             isFalse = configBool
 
-        if isFalse == 0: # logUserUpdates is disabled, return
+        if isFalse == 0:  # logUserUpdates is disabled, return
             return
 
-        typeOfChange = "" # Create an empty string defining the type of change that occurs
+        typeOfChange = ""  # Create an empty string defining the type of change that occurs
 
-        record = db.record("SELECT logChannel FROM guildSettings WHERE GuildID =?", before.guild.id) # Get the logChannel from the database
+        record = db.record("SELECT logChannel FROM guildSettings WHERE GuildID =?", before.guild.id)  # Get the logChannel from the database
         for (configChannel) in record:
             logChannel = configChannel
         channel = self.bot.get_channel(logChannel)
 
         # If any of the users properties change, set the type of change to the change that occured 
-        if after.display_name is not before.display_name: 
+        if after.display_name is not before.display_name:
             typeOfChange = "Nickname"
         if after.avatar is not before.avatar:
             typeOfChange = "Avatar"
-        if after.username is not before.username:
-            typeOfChange = "Username"
+        if after.display_name is not before.display_name:
+            typeOfChange = "Display Name"
         if after.discriminator is not before.discriminator:
             typeOfChange == "Discriminator"
 
@@ -453,16 +471,17 @@ class Logs(Cog):
             await channel.send(embed=embed)
         else:
             return
+
     ###
 
     ### Economy Logs
 
     async def give_or_remove_coins_logs(self, inter, authorizer, receiver, amount):
         balRecord = db.record("SELECT balance FROM economy WHERE (GuildID, UserID) = (?, ?)", inter.guild.id,
-                            receiver.id) # Get the recievers balance from the database
+                              receiver.id)  # Get the recievers balance from the database
         for (balance) in balRecord:
             memberBalance = balance
-        record = db.record("SELECT logChannel FROM guildSettings WHERE GuildID =?", inter.guild.id) # Get the logChannel from the database
+        record = db.record("SELECT logChannel FROM guildSettings WHERE GuildID =?", inter.guild.id)  # Get the logChannel from the database
         for (configChannel) in record:
             logChannel = configChannel
 
@@ -481,6 +500,7 @@ class Logs(Cog):
         embed.add_field(name="Old Balance: ", value=oldBalance, inline=False)
         embed.add_field(name="New Balance: ", value=newBalance, inline=False)
         await channel.send(embed=embed)
+
 
 def setup(bot):
     bot.add_cog(Logs(bot))
