@@ -26,7 +26,7 @@ class Moderation(Cog):
 
     # Bans the mentioned member with an optional reason. Requires the ban_members permission.
     @has_permissions(ban_members=True)
-    @slash_command(name="ban", description=" Bans the mentioned member.")
+    @slash_command(name="ban", description="Bans the mentioned member.")
     async def _ban(self, inter, member: Member, *, reason=''):
 
         record = db.record("SELECT moderationModule FROM guildSettings WHERE GuildID =?", inter.guild.id)  # Check the database to see if the moderation module is enabled in the guild.
@@ -43,7 +43,7 @@ class Moderation(Cog):
 
     # Kicks the mentioned member with an optional reason. Requires the kick_members permission.
     @has_permissions(kick_members=True)
-    @slash_command(name="kick", description=" Kicks the mentioned member.")
+    @slash_command(name="kick", description="Kicks the mentioned member.")
     async def _kick(self, inter, member: Member, *, reason=''):
 
         record = db.record("SELECT moderationModule FROM guildSettings WHERE GuildID =?", inter.guild.id)  # Check the database to see if the moderation module is enabled in the guild.
@@ -61,7 +61,7 @@ class Moderation(Cog):
     # Restrict a member with an optional amount of time. Requires the kick_members permission.
     @has_permissions(kick_members=True)
     @slash_command(name="restrict",
-                   description=" Restricts the mentioned member for x amount of time.")
+                   description="Restricts the mentioned member for x amount of time.")
     async def _restricted(self, inter, member: Member, *, duration: int):
 
         record = db.record("SELECT moderationModule FROM guildSettings WHERE GuildID =?", inter.guild.id)  # Check the database to see if the moderation module is enabled in the guild.
@@ -101,7 +101,7 @@ class Moderation(Cog):
 
     # Unbans the member with the provided id with an optional reason. Requires the ban_members permission.
     @has_permissions(ban_members=True)
-    @slash_command(name="unban", description="[MODERATION] Unbans the chosen user ID.")
+    @slash_command(name="unban", description="Unbans the chosen user ID.")
     async def _unban(self, inter, memberID: int, *, reason=''):
 
         record = db.record("SELECT moderationModule FROM guildSettings WHERE GuildID =?", inter.guild.id)  # Check the database to see if the moderation module is enabled in the guild.
@@ -124,7 +124,7 @@ class Moderation(Cog):
 
     # Unrestrict the mentioned member with an optional reason. Requires the kick_members permission.
     @has_permissions(kick_members=True)
-    @slash_command(name="unrestrict", description="[MODERATION] Unrestricts the mentioned member.")
+    @slash_command(name="unrestrict", description="Unrestricts the mentioned member.")
     async def _unrestrict(self, inter, member: Member, *, reason=''):
 
         record = db.record("SELECT moderationModule FROM guildSettings WHERE GuildID =?", inter.guild.id)  # Check the database to see if the moderation module is enabled in the guild.
@@ -149,7 +149,7 @@ class Moderation(Cog):
 
     # Clears the specified amount of messages. Requires the manage_messages permission. Cannot delete messages over 14 days.
     @has_permissions(manage_messages=True)
-    @slash_command(name="clear", description=" Deletes the inputted amount of messages in a channel.")
+    @slash_command(name="clear", description="Deletes the inputted amount of messages in a channel.")
     async def _clear(self, inter, amount: int):
         await inter.response.defer()
         record = db.record("SELECT moderationModule FROM guildSettings WHERE GuildID =?", inter.guild.id)  # Check the database to see if the moderation module is enabled in the guild.
@@ -175,7 +175,7 @@ class Moderation(Cog):
     async def roleManager(self, inter):
         pass
 
-    @roleManager.sub_command(name="give-role")
+    @roleManager.sub_command(name="give-role", description="Give a role to the mentioned member.")
     async def giveRole(self, inter, member: Member, role: Role):
         record = db.record("SELECT moderationModule FROM guildSettings WHERE GuildID =?", inter.guild.id)  # Check the database to see if the moderation module is enabled in the guild.
         for (configBool) in record:
@@ -201,9 +201,8 @@ class Moderation(Cog):
             embed.add_field(name="Roles Before: ", value=roleList)
             await inter.channel.send(embed=embed)
             await logs.Logs.logRoleChangesViaCommand(self, inter, "Role Given", inter.author, member, role, roleList)
-            # TODO Add Logging to the command
 
-    @roleManager.sub_command(name="remove-role")
+    @roleManager.sub_command(name="remove-role", description="Remove a role from the mentioned member.")
     async def removeRole(self, inter, member: Member, role: Role):
         record = db.record("SELECT moderationModule FROM guildSettings WHERE GuildID =?", inter.guild.id)  # Check the database to see if the moderation module is enabled in the guild.
         for (configBool) in record:
@@ -229,9 +228,9 @@ class Moderation(Cog):
             embed = Embed(title=f"*{role}* Removed From {member}", color=disnake.Color.red(), timestamp=datetime.now())
             embed.add_field(name="Roles Before Removal: ", value=roleList)
             await inter.channel.send(embed=embed)
-            # TODO Add logging to the command
+            await logs.Logs.logRoleChangesViaCommand(self, inter, "Role Removed", inter.author, member, role, roleList)
 
-    @roleManager.sub_command(name="remove-all-roles")
+    @roleManager.sub_command(name="remove-all-roles", description="Remove all of the roles from a member.")
     async def removeAllRoles(self, inter, member: Member):
         record = db.record("SELECT moderationModule FROM guildSettings WHERE GuildID =?", inter.guild.id)  # Check the database to see if the moderation module is enabled in the guild.
         for (configBool) in record:
@@ -261,7 +260,7 @@ class Moderation(Cog):
         embed = Embed(title=f"*All roles* Removed From {member}", color=disnake.Color.red(), timestamp=datetime.now())
         embed.add_field(name="Roles Before Removal: ", value=roleList)
         await inter.channel.send(embed=embed)
-        # TODO Add logging to the command
+        await logs.Logs.logRoleChangesViaCommand(self, inter, "All Roles Removed.", inter.author, member, "", roleList)
 
     # VERSION 0.5.5 [REMOVED]
     # # Gives roles with the provided user ID. Requires the moderate_members permission.

@@ -19,7 +19,7 @@ class tickets(Cog):
 
             ### MEMBER COMMMANDS [START]
 
-    @slash_command(name="open-ticket")
+    @slash_command(name="open-ticket", description="Open a ticket within a guild.")
     async def openTicket(self, inter):
         record = db.record("SELECT ticketModule FROM guildSettings WHERE GuildID = (?)", inter.guild.id)
         for rec in record:
@@ -52,7 +52,7 @@ class tickets(Cog):
             await inter.response.send_message(f"Your ticket has been opened.", delete_after=15)
             await ticketChannel.send(f"{inter.author.mention} this is your ticket. Please place your question here and a staff member will reach out to you shortly.")
 
-    @slash_command(name="close-ticket")
+    @slash_command(name="close-ticket", description="Close your ticket within the guild.")
     async def closeTicket(self, inter):
         record = db.record("SELECT ticketModule FROM guildSettings WHERE GuildID = (?)", inter.guild.id)
         for rec in record:
@@ -80,7 +80,7 @@ class tickets(Cog):
 
             ### ADMIN COMMANDS [START]
 
-    @slash_command(name="force-close-ticket")
+    @slash_command(name="force-close-ticket", description="Force close the ticket channel that you are currently in.")
     async def forceCloseTicket(self, inter):
         record = db.record("SELECT modRole FROM guildSettings WHERE GuildID =?", inter.guild.id)
         for (role) in record:

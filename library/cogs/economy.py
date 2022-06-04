@@ -115,7 +115,7 @@ class Economy(Cog):
         await inter.response.send_message(f"{inter.author.mention} stole {stolenAmount} coins from {target.mention}!")
 
     # See the balance of whoever ran the command.
-    @slash_command(name="balance", description="Checks the members balance.")
+    @slash_command(name="balance", description="View your balance!")
     async def balance(self, inter):
 
         record = db.record("SELECT economyModule FROM guildSettings WHERE GuildID = (?)", inter.guild.id)
@@ -130,7 +130,7 @@ class Economy(Cog):
         record = db.record("SELECT balance FROM economy WHERE (GuildID, UserID) = (?, ?)", inter.guild.id, inter.author.id)
         if record is None:  # If the member does not have an account, open an account
             await openAccount(inter.guild.id, inter.author.id)
-        # Regrabs the balance of the member
+        # Grabs the balance of the member
         balRecord = db.record("SELECT balance FROM economy WHERE (GuildID, UserID) = (?, ?)", inter.guild.id, inter.author.id)
 
         for (balance) in balRecord:
@@ -206,7 +206,7 @@ class Economy(Cog):
     ### Admin Commands[START]
 
     # Tells the command runner the amount of coins within the server
-    @slash_command(name="coins-In-Circulation")
+    @slash_command(name="coins-In-Circulation", description="See the total amount of coins within the guild.")
     async def totalCoinsInCirculation(self, inter):
 
         record = db.record("SELECT economyModule FROM guildSettings WHERE GuildID = (?)", inter.guild.id)
@@ -238,7 +238,7 @@ class Economy(Cog):
         await inter.response.send_message(f"There is currently {totalCoins} in circulation in {inter.guild.name}.")
 
     # See all balances and who's account they are in
-    @slash_command(name="see-All-Balances", description="[ECONOMY] See all of the members and their balance.")
+    @slash_command(name="see-All-Balances", description="See all of the members and their balance.")
     async def seeAllBalances(self, inter):
 
         record = db.record("SELECT economyModule FROM guildSettings WHERE GuildID = (?)", inter.guild.id)
@@ -272,7 +272,7 @@ class Economy(Cog):
 
     # Give or remove a specified amount of coins from the selected user
     @slash_command(name="give-Or-Remove-Coins",
-                   description="[ECONOMY] Gives or removes the declared amount of coins to the mentioned member.")
+                   description="Gives or removes the declared amount of coins to the mentioned member.")
     async def give_or_remove_coins(self, inter, member: Member, amount: int):
 
         record = db.record("SELECT economyModule FROM guildSettings WHERE GuildID = (?)", inter.guild.id)
@@ -346,7 +346,7 @@ class Economy(Cog):
         await logs.Logs.give_or_remove_coins_logs(self, inter, inter.author, member, amount)  # Log to the chosen logs channel
 
     # See the balance of the selected member
-    @slash_command(name="see-Balance", description="[ECONOMY] Check a members balance.")
+    @slash_command(name="see-Balance", description="Check a members balance.")
     async def seeBalance(self, inter, member: Member):
 
         record = db.record("SELECT economyModule FROM guildSettings WHERE GuildID = (?)", inter.guild.id)
@@ -394,7 +394,7 @@ class Economy(Cog):
     ### ADMIN CONFIGURATION COMMANDS [START]
 
     # Change the max amount of coins that a guild can hold.
-    @slash_command(name="change-max-coins", description="[ECONOMY] Changes the max amount of coins that can be within the guild.")
+    @slash_command(name="change-max-coins", description="Changes the max amount of coins that can be within the guild.")
     async def changeMaxCoins(self, inter, new_amount: int):
 
         record = db.record("SELECT economyModule FROM guildSettings WHERE GuildID = (?)", inter.guild.id)

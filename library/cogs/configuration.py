@@ -37,7 +37,7 @@ class Configuration(Cog):
     enableOrDisableOption = option_enum({"Enable": "enable", "Disable": "disable"})
 
     # Enable a module within the guild. Has a list of options(All modules in the bot).
-    @slash_command(name="toggle-module")
+    @slash_command(name="toggle-module", description="Enable/Disable modules within the guild.")
     async def toggleModule(self, inter, toggle: enableOrDisableOption, modules: Modules):
         record = db.record("SELECT modRole FROM guildSettings WHERE GuildID =?", inter.guild.id)  # Grabs the lowest moderator role from the database
         for (role) in record:
@@ -84,7 +84,7 @@ class Configuration(Cog):
 
         db.commit()
 
-    @slash_command(name="set-channel")
+    @slash_command(name="set-channel", description="Set the channels used by modules.")
     async def setChannel(self, inter, modules: ModulesWithChannels, channel: TextChannel):
         record = db.record("SELECT modRole FROM guildSettings WHERE GuildID =?", inter.guild.id)  # Grabs the lowest moderator role from the database
         for (role) in record:
@@ -114,7 +114,7 @@ class Configuration(Cog):
 
         await inter.response.send_message(f"{channelName} channel has been set to {channel.mention}.")
 
-    @slash_command(name="set-role", scope=889946079188095006)
+    @slash_command(name="set-role", description="Set the role to be used by modules.")
     async def setRole(self, inter, role_options: RoleConfigurations, role: Role):
         record = db.record("SELECT modRole FROM guildSettings WHERE GuildID =?", inter.guild.id)  # Grabs the lowest moderator role from the database
         for (modRole) in record:
@@ -140,7 +140,7 @@ class Configuration(Cog):
     async def configModule(self, inter):
         pass
 
-    @configModule.sub_command()
+    @configModule.sub_command(description="Configure the Moderation module.")
     async def Moderation(self, inter, toggle: enableOrDisableOption, setting: moderationOptions):
         record = db.record(f"SELECT {setting} FROM guilds WHERE GuildID = (?)", inter.guild.id)
         for rec in record:
@@ -162,7 +162,7 @@ class Configuration(Cog):
                 await inter.response.send_message(f"{setting} has been disabled.")
         db.commit()
 
-    @configModule.sub_command()
+    @configModule.sub_command(description="Configure the Logging module.")
     async def Logging(self, inter, toggle: enableOrDisableOption, setting: loggingOptions):
         record = db.record(f"SELECT {setting} FROM guilds WHERE GuildID = (?)", inter.guild.id)
         for rec in record:
@@ -184,7 +184,7 @@ class Configuration(Cog):
                 await inter.response.send_message(f"{setting} has been disabled.")
         db.commit()
 
-    @configModule.sub_command()
+    @configModule.sub_command(description="Configure the AutoModeration module.")
     async def AutoModeration(self, inter, toggle: enableOrDisableOption, setting: autoModerationOptions):
         record = db.record(f"SELECT {setting} FROM guilds WHERE GuildID = (?)", inter.guild.id)
         for rec in record:

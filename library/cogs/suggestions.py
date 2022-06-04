@@ -17,7 +17,7 @@ class Suggestions(Cog):
 
     ###         @EVERYONE COMMANDS[START]
 
-    @slash_command(name="suggest", description="Creates a suggestion")
+    @slash_command(name="suggest", description="Creates a suggestion for the guild.")
     async def suggest(self, inter, suggestion: str):
         record = db.record("SELECT suggestionsModule FROM guildSettings WHERE GuildID =?", inter.guild.id)  # Check the database to see if the suggestModule is enabled.
         for (configBool) in record:
@@ -52,7 +52,7 @@ class Suggestions(Cog):
     ###         ADMIN COMMANDS[START]
 
     # Get all the suggestions and view them.
-    @slash_command(name="see-All-Suggestions")
+    @slash_command(name="see-All-Suggestions", description="See all of the suggestions currently open within the guild.")
     async def seeAllSuggestions(self, inter, page_number: int):
         record = db.record("SELECT modRole FROM guildSettings WHERE GuildID =?", inter.guild.id) # Get the minimum moderator role from the database
         for (role) in record:
@@ -110,7 +110,7 @@ class Suggestions(Cog):
             await inter.response.send_message(embed=embed) # Send the embed
 
     # Update a status | should be used after using seeAllSuggestions
-    @slash_command(name="update-Status")
+    @slash_command(name="update-Status", description="Update the status of a suggestion.")
     async def updateStatus(self, inter, suggestion_number, new_status):
         record = db.record("SELECT modRole FROM guildSettings WHERE GuildID =?", inter.guild.id)
         for (role) in record:
@@ -145,7 +145,7 @@ class Suggestions(Cog):
             await inter.response.send_message(embed=embed) # Send the embed
 
     # Close a suggestion | Should be used after seeAllSuggestions
-    @slash_command(name="close-Suggestion")
+    @slash_command(name="close-Suggestion", description="Close a suggestion within a guild.")
     async def closeSuggestion(self, inter, suggestion_number):
         record = db.record("SELECT modRole FROM guildSettings WHERE GuildID =?", inter.guild.id)
         for (role) in record:
